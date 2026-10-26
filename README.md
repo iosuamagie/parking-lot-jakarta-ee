@@ -1,5 +1,7 @@
 # Parking lot (Jakarta EE)
 
+[![CI](https://github.com/iosuamagie/parkpulse/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/iosuamagie/parkpulse/actions/workflows/ci.yml)
+
 A web app for managing the cars in a parking lot and the users who can see or change them. I built it step by step, one lab at a time, for a course at Lucian Blaga University of Sibiu (ULBS).
 
 ## Features
