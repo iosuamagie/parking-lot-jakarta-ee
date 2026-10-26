@@ -17,29 +17,57 @@ import java.util.Base64;
 
 /**
  * Protects every POST form against CSRF: the form must send back the random token kept in the session.
- * Forms add the token with the {@code <t:csrf/>} tag.
+ * Forms add the token with the {@code <t:csrf/>} tag. It also renews the session id after login.
  */
 @WebFilter(urlPatterns = "/*", dispatcherTypes = {DispatcherType.REQUEST, DispatcherType.FORWARD})
 public class CsrfFilter extends HttpFilter {
     public static final String TOKEN_NAME = "csrfToken";
     public static final String PARAMETER_NAME = "_csrf";
+    private static final String LOGGED_IN_AS = "loggedInAs";
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        renewSessionAfterLogin(request);
         String expected = tokenFor(request.getSession());
 
         // Forwards (for example to the login page) only need the token to exist, there is nothing to check
         if (request.getDispatcherType() == DispatcherType.REQUEST
                 && "POST".equals(request.getMethod())
-                && !request.getRequestURI().endsWith("/j_security_check")
-                && !matches(expected, request.getParameter(PARAMETER_NAME))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid or missing CSRF token");
-            return;
+                && !request.getRequestURI().endsWith("/j_security_check")) {
+            String actual;
+            try {
+                actual = request.getParameter(PARAMETER_NAME);
+            } catch (RuntimeException unreadable) {
+                // Uploads over the @MultipartConfig limit can't be read (IllegalStateException in the
+                // Servlet spec, a plain RuntimeException on Payara)
+                boolean upload = String.valueOf(request.getContentType()).startsWith("multipart/");
+                response.sendError(upload ? HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE : HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            if (!matches(expected, actual)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid or missing CSRF token");
+                return;
+            }
         }
         chain.doFilter(request, response);
+    }
+
+    /**
+     * Gives the session a new id (and a new CSRF token) on the first request after a login,
+     * so a session id planted before the login is useless afterwards (session fixation).
+     */
+    private static void renewSessionAfterLogin(HttpServletRequest request) {
+        String user = request.getRemoteUser();
+        HttpSession session = request.getSession(false);
+        if (user == null || session == null || user.equals(session.getAttribute(LOGGED_IN_AS))) {
+            return;
+        }
+        request.changeSessionId();
+        session.setAttribute(LOGGED_IN_AS, user);
+        session.removeAttribute(TOKEN_NAME);
     }
 
     static String tokenFor(HttpSession session) {

@@ -12,29 +12,46 @@ A web app for managing the cars in a parking lot and the users who can see or ch
 - Pick users for an invoice; the selection lives in a stateful, session-scoped EJB
 - A small JSON API: `GET /resources/cars` and `GET /resources/cars/{id}`
 
+## Run it in one command
+
+You only need [Docker](https://www.docker.com/products/docker-desktop/).
+
+```
+docker compose up --build
+```
+
+The first start downloads Payara and PostgreSQL and takes a few minutes; later starts take about 30 seconds. Then open http://localhost:8080 and log in with one of the demo users, all with the password `parkpulse-demo`:
+
+| User | What they can do |
+|---|---|
+| `admin` | everything |
+| `viewer` | see cars and users |
+| `billing` | see cars and users, pick users for an invoice |
+
+If port 8080 is taken, pick another one: `PARKPULSE_PORT=8081 docker compose up --build`.
+
+The demo passwords are for your own computer only. Before putting the app anywhere public, set `PARKPULSE_DB_PASSWORD` and `PARKPULSE_DEMO_PASSWORD` in a `.env` file (it is ignored by git), or turn the demo data off with `PARKPULSE_DEMO_DATA=false`.
+
+To start again from an empty database: `docker compose down -v`.
+
 ## Stack
 
-Java 21, Jakarta EE 10 (Servlets, JSP with JSTL, EJB, CDI, JPA, JAX-RS), Gradle.
+Java 21, Jakarta EE 10 (Servlets, JSP with JSTL, EJB, CDI, JPA, JAX-RS, Jakarta Security), Gradle, running on Payara Server 7 with PostgreSQL 17.
 
 ```
 src/main/java/org/example/parkinglot
   entities/   JPA entities: Car, CarPhoto, User, UserGroup
-  ejb/        business logic and database access
+  ejb/        business logic, database access, the data source and the demo data
+  security/   login setup and the CSRF filter
   common/     DTOs passed to the pages and the API
   servlets/   controllers for cars, users and login
   rest/       JAX-RS API
 src/main/webapp/WEB-INF/pages   JSP views
 ```
 
-## Running it
+## Without Docker
 
-1. Build the WAR file:
-   ```
-   ./gradlew war
-   ```
-2. On a Jakarta EE 10 server (Payara or GlassFish), create a JDBC resource named `jdbc/ParkingLotResource`. JPA creates the tables on first deploy. No security realm is needed: the login is set up in `SecurityConfig`.
-3. Deploy `build/libs/*.war` and open the app in a browser.
+1. Build the WAR file with `./gradlew war`.
+2. Deploy `build/libs/parkpulse.war` on a Jakarta EE 10 or 11 server (tested on Payara 7) with these environment variables: `PARKPULSE_DB_URL` (for example `jdbc:postgresql://localhost:5432/parkpulse`), `PARKPULSE_DB_USER` and `PARKPULSE_DB_PASSWORD`. The PostgreSQL driver is inside the WAR, JPA creates the tables, and the login needs no server setup.
 
 Run the unit tests with `./gradlew test`.
-
-Users created before the switch to PBKDF2 still have old SHA-256 hashes and can no longer log in; create them again.

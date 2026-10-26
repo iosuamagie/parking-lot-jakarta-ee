@@ -4,7 +4,7 @@
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
              version="3.0">
     <persistence-unit name="default" transaction-type="JTA">
-        <jta-data-source>jdbc/ParkingLotResource</jta-data-source>
+        <jta-data-source>java:app/jdbc/parkpulse</jta-data-source>
         <class>org.example.parkinglot.entities.User</class>
         <class>org.example.parkinglot.entities.Car</class>
         <class>org.example.parkinglot.entities.CarPhoto</class>

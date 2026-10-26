@@ -46,7 +46,8 @@ public class AddCarPhoto extends HttpServlet {
         Part filePart;
         try {
             filePart = request.getPart("file");
-        } catch (IllegalStateException tooLarge) {
+        } catch (RuntimeException tooLarge) {
+            // IllegalStateException in the Servlet spec, a plain RuntimeException on Payara
             response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "The photo can be at most 2 MB");
             return;
         }

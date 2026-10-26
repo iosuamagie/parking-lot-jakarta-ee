@@ -47,7 +47,10 @@ public class UserBean {
         return dtoList;
     }
 
-    public void createUser(String username, String email, String password, Collection<String> groups) {
+    /**
+     * @return the id of the new user
+     */
+    public Long createUser(String username, String email, String password, Collection<String> groups) {
         LOG.info("createUser");
 
         User newUser = new User();
@@ -58,6 +61,11 @@ public class UserBean {
         entityManager.persist(newUser);
 
         assignGroupsToUser(username, groups);
+        return newUser.getId();
+    }
+
+    public long countUsers() {
+        return entityManager.createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
     }
 
     // The login identity store reads the groups from the usergroups table, by username

@@ -5,6 +5,7 @@ import jakarta.security.enterprise.authentication.mechanism.http.FormAuthenticat
 import jakarta.security.enterprise.authentication.mechanism.http.LoginToContinue;
 import jakarta.security.enterprise.identitystore.DatabaseIdentityStoreDefinition;
 import jakarta.security.enterprise.identitystore.Pbkdf2PasswordHash;
+import org.example.parkinglot.ejb.DatabaseConfig;
 
 /**
  * Login setup with Jakarta Security. It lives in the code, so the server needs no realm configuration.
@@ -13,7 +14,7 @@ import jakarta.security.enterprise.identitystore.Pbkdf2PasswordHash;
 @FormAuthenticationMechanismDefinition(
         loginToContinue = @LoginToContinue(loginPage = "/Login", errorPage = "/Login?error=true"))
 @DatabaseIdentityStoreDefinition(
-        dataSourceLookup = "jdbc/ParkingLotResource",
+        dataSourceLookup = DatabaseConfig.DATA_SOURCE,
         callerQuery = "SELECT password FROM users WHERE username = ?",
         groupsQuery = "SELECT usergroup FROM usergroups WHERE username = ?",
         hashAlgorithm = Pbkdf2PasswordHash.class,
