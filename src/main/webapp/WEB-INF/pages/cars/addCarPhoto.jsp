@@ -7,17 +7,18 @@
 
     <form class="needs-validation" novalidate method="POST" enctype="multipart/form-data"
           action="${pageContext.request.contextPath}/AddCarPhoto">
+        <t:csrf/>
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                License plate: ${car.licensePlate}
+                License plate: <c:out value="${car.licensePlate}"/>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="file">Photo</label>
-                <input type="file" name="file" id="file" required>
+                <label for="file">Photo (PNG, JPEG, GIF or WebP, at most 2 MB)</label>
+                <input type="file" name="file" id="file" accept="image/png,image/jpeg,image/gif,image/webp" required>
                 <div class="invalid-feedback">
                     Photo is required.
                 </div>
@@ -27,6 +28,6 @@
         <input type="hidden" name="car_id" value="${car.id}"/>
 
         <hr class="mb-4">
-        <button class="btn btn-primary btn-lg btn-block" type="submit">Save</button>
+        <button class="btn btn-primary btn-lg" type="submit">Save</button>
     </form>
 </t:pageTemplate>

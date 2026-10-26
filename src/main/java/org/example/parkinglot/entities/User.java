@@ -70,25 +70,4 @@ public class User {
     public void setId(Long id) {
         this.id = id;
     }
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_groups",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private List<UserGroup> groups = new ArrayList<>();
-
-    // 1. Metoda getGroups() - folosită la user.getGroups().clear()
-    public List<UserGroup> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(List<UserGroup> groups) {
-        this.groups = groups;
-    }
-
-    // 2. Metoda addGroup() - folosită la user.addGroup(userGroup)
-    public void addGroup(UserGroup group) {
-        this.groups.add(group);
-    }
-
 }

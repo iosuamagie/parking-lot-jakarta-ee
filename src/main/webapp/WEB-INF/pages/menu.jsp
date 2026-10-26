@@ -1,4 +1,5 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <header data-bs-theme="dark">
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
         <div class="container-fluid">
@@ -41,7 +42,10 @@
                                 <a class="nav-link" href="${pageContext.request.contextPath}/Login">Login</a>
                             </c:when>
                             <c:otherwise>
-                                <a class="nav-link" href="${pageContext.request.contextPath}/Logout">Logout</a>
+                                <form method="POST" action="${pageContext.request.contextPath}/Logout" class="d-inline">
+                                    <t:csrf/>
+                                    <button type="submit" class="nav-link btn btn-link">Logout</button>
+                                </form>
                             </c:otherwise>
                         </c:choose>
                     </li>

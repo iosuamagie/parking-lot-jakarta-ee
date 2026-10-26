@@ -25,6 +25,8 @@ dependencies {
     compileOnly('jakarta.platform:jakarta.jakartaee-api:10.0.0')
     compileOnly('org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1')
 
+    // The server provides the Jakarta EE classes at runtime; the tests need them on their own classpath
+    testImplementation('jakarta.platform:jakarta.jakartaee-api:10.0.0')
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }

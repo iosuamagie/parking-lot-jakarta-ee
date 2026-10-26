@@ -1,15 +1,21 @@
 package org.example.parkinglot.servlets.users;
 
 import jakarta.inject.Inject;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.HttpConstraint;
+import jakarta.servlet.annotation.ServletSecurity;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.example.parkinglot.common.Roles;
 import org.example.parkinglot.ejb.UserBean;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
-@ServletSecurity(value = @HttpConstraint(rolesAllowed = {"WRITE_USERS"}))
+@ServletSecurity(value = @HttpConstraint(rolesAllowed = {Roles.WRITE_USERS}))
 @WebServlet(name = "AddUser", value = "/AddUser")
 public class AddUser extends HttpServlet {
 
@@ -18,27 +24,31 @@ public class AddUser extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Trimitem lista de grupuri posibile către JSP pentru a popula checkbox-urile
-        request.setAttribute("userGroups", new String[] {"READ_CARS", "WRITE_CARS", "READ_USERS", "WRITE_USERS"});
-
-        request.getRequestDispatcher("/WEB-INF/pages/users/addUser.jsp").forward(request, response);
+        showForm(request, response, null);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String username = request.getParameter("username");
-        String email = request.getParameter("email");
+        String username = UserForm.trim(request.getParameter("username"));
+        String email = UserForm.trim(request.getParameter("email"));
         String password = request.getParameter("password");
         String[] userGroups = request.getParameterValues("user_groups");
 
-        // Dacă nu s-a selectat niciun grup, inițializăm array-ul gol pentru a evita NullPointerException
-        if (userGroups == null) {
-            userGroups = new String[0];
+        String error = UserForm.validate(username, email, password, true, null, userBean);
+        if (error != null) {
+            showForm(request, response, error);
+            return;
         }
 
-        // Apelăm metoda de creare (aceasta va fi roșie până o implementezi în UserBean)
-        userBean.createUser(username, email, password, Arrays.asList(userGroups));
+        userBean.createUser(username, email, password, userGroups != null ? Arrays.asList(userGroups) : List.of());
 
         response.sendRedirect(request.getContextPath() + "/Users");
+    }
+
+    private void showForm(HttpServletRequest request, HttpServletResponse response, String errorMessage)
+            throws ServletException, IOException {
+        request.setAttribute("errorMessage", errorMessage);
+        request.setAttribute("userGroups", Roles.ALL);
+        request.getRequestDispatcher("/WEB-INF/pages/users/addUser.jsp").forward(request, response);
     }
 }

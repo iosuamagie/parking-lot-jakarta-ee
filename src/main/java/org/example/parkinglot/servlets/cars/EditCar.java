@@ -9,14 +9,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.parkinglot.common.CarDto;
+import org.example.parkinglot.common.Roles;
 import org.example.parkinglot.common.UserDto;
 import org.example.parkinglot.ejb.CarsBean;
 import org.example.parkinglot.ejb.UserBean;
+import org.example.parkinglot.servlets.Params;
 
 import java.io.IOException;
-import java.util.List;
 
-@ServletSecurity(value = @HttpConstraint(rolesAllowed = {"WRITE_CARS"}))
+@ServletSecurity(value = @HttpConstraint(rolesAllowed = {Roles.WRITE_CARS}))
 @WebServlet(name = "EditCar", value = "/EditCar")
 public class EditCar extends HttpServlet {
 
@@ -28,35 +29,46 @@ public class EditCar extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 1. Luăm lista de useri pentru dropdown
-        List<UserDto> users = userBean.findAllUsers();
-        request.setAttribute("users", users);
-
-        // 2. Luăm ID-ul mașinii din URL (?id=...)
-        Long carId = Long.parseLong(request.getParameter("id"));
-
-        // 3. Găsim mașina pe care vrem să o edităm
-        CarDto car = carsBean.findById(carId);
-        request.setAttribute("car", car);
-
-        // 4. Trimitem totul la pagina JSP
-        request.getRequestDispatcher("/WEB-INF/pages/cars/editCar.jsp").forward(request, response);
+        Long carId = Params.parseId(request.getParameter("id"));
+        CarDto car = carId == null ? null : carsBean.findById(carId);
+        if (car == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        showForm(request, response, car, null);
     }
-
-    // În org.example.parkinglot.servlets.cars.EditCar
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 1. Preluăm datele din formular
-        String licensePlate = request.getParameter("license_plate");
-        String parkingSpot = request.getParameter("parking_spot");
-        Long userId = Long.parseLong(request.getParameter("owner_id"));
-        Long carId = Long.parseLong(request.getParameter("car_id")); // ID-ul din input-ul hidden
+        String licensePlate = CarForm.trim(request.getParameter("license_plate"));
+        String parkingSpot = CarForm.trim(request.getParameter("parking_spot"));
+        Long userId = Params.parseId(request.getParameter("owner_id"));
+        Long carId = Params.parseId(request.getParameter("car_id"));
+        if (carId == null || carsBean.findById(carId) == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
-        // 2. Apelăm metoda creată mai sus în Bean
-        carsBean.updateCar(carId, licensePlate, parkingSpot, userId);
+        String error = CarForm.validate(licensePlate, parkingSpot, userId, carId, carsBean);
+        if (error == null && !carsBean.updateCar(carId, licensePlate, parkingSpot, userId)) {
+            error = "The selected owner no longer exists.";
+        }
+        if (error != null) {
+            // Show the form again with what the user typed
+            UserDto owner = userId == null ? null : userBean.findById(userId);
+            CarDto typed = new CarDto(carId, licensePlate, parkingSpot, owner == null ? "" : owner.getUsername());
+            showForm(request, response, typed, error);
+            return;
+        }
 
-        // 3. Redirectăm la pagina principală
         response.sendRedirect(request.getContextPath() + "/Cars");
+    }
+
+    private void showForm(HttpServletRequest request, HttpServletResponse response, CarDto car, String errorMessage)
+            throws ServletException, IOException {
+        request.setAttribute("car", car);
+        request.setAttribute("errorMessage", errorMessage);
+        request.setAttribute("users", userBean.findAllUsers());
+        request.getRequestDispatcher("/WEB-INF/pages/cars/editCar.jsp").forward(request, response);
     }
 }

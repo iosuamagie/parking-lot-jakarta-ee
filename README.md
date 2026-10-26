@@ -6,7 +6,8 @@ A web app for managing the cars in a parking lot and the users who can see or ch
 
 - Add, edit and delete cars, each with an owner, a license plate and a parking spot
 - Upload a photo for a car and show it in the car list
-- Form login backed by a JDBC realm, with passwords stored as SHA-256 hashes
+- Form login with Jakarta Security, configured in code; passwords are stored as salted PBKDF2 hashes
+- CSRF tokens on every form, escaped output in every page, and photo uploads checked by their real file type
 - Role-based access: `READ_CARS`, `WRITE_CARS`, `READ_USERS`, `WRITE_USERS` and `INVOICING`, checked on every servlet with `@ServletSecurity`
 - Pick users for an invoice; the selection lives in a stateful, session-scoped EJB
 - A small JSON API: `GET /resources/cars` and `GET /resources/cars/{id}`
@@ -31,9 +32,9 @@ src/main/webapp/WEB-INF/pages   JSP views
    ```
    ./gradlew war
    ```
-2. On a Jakarta EE 10 server (Payara or GlassFish), create a JDBC resource named `jdbc/ParkingLotResource` and a JDBC realm named `jdbcRealmParkingLot` that reads usernames, SHA-256 passwords and groups from the app's tables. JPA creates the tables on first deploy.
+2. On a Jakarta EE 10 server (Payara or GlassFish), create a JDBC resource named `jdbc/ParkingLotResource`. JPA creates the tables on first deploy. No security realm is needed: the login is set up in `SecurityConfig`.
 3. Deploy `build/libs/*.war` and open the app in a browser.
 
-## Known issues
+Run the unit tests with `./gradlew test`.
 
-The password hashes are not salted, so two users with the same password get the same hash. A salted algorithm such as PBKDF2 or bcrypt would be safer.
+Users created before the switch to PBKDF2 still have old SHA-256 hashes and can no longer log in; create them again.

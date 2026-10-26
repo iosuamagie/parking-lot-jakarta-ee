@@ -1,20 +1,24 @@
 <%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<jsp:useBean id="car" scope="request" type="org.example.parkinglot.common.CarDto"/>
-<jsp:useBean id="users" scope="request" type="java.util.List"/>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <t:pageTemplate pageTitle="Edit Car">
+    <c:if test="${not empty errorMessage}">
+        <div class="alert alert-danger" role="alert">
+            <c:out value="${errorMessage}"/>
+        </div>
+    </c:if>
 
     <h1>Edit Car</h1>
 
     <form class="needs-validation" novalidate method="POST" action="${pageContext.request.contextPath}/EditCar">
-
+        <t:csrf/>
         <div class="row g-3">
             <div class="col-md-6 mb-3">
                 <label for="license_plate" class="form-label">License Plate</label>
                 <input type="text" class="form-control" id="license_plate" name="license_plate"
-                       placeholder="" value="${car.licensePlate}" required>
+                       value="${fn:escapeXml(car.licensePlate)}" minlength="3" maxlength="100" required>
                 <div class="invalid-feedback">
                     License Plate is required.
                 </div>
@@ -23,7 +27,7 @@
             <div class="col-md-6 mb-3">
                 <label for="parking_spot" class="form-label">Parking Spot</label>
                 <input type="text" class="form-control" id="parking_spot" name="parking_spot"
-                       placeholder="" value="${car.parkingSpot}" required>
+                       value="${fn:escapeXml(car.parkingSpot)}" minlength="3" maxlength="100" required>
                 <div class="invalid-feedback">
                     Parking Spot is required.
                 </div>
@@ -33,27 +37,21 @@
                 <label for="owner_id" class="form-label">Owner</label>
                 <select class="form-select" id="owner_id" name="owner_id" required>
                     <option value="">Choose...</option>
-
-                    <c:forEach var="user" items="${users}" varStatus="status">
+                    <c:forEach var="user" items="${users}">
                         <option value="${user.id}" ${car.ownerName eq user.username ? 'selected' : ''}>
-                                ${user.username}
+                            <c:out value="${user.username}"/>
                         </option>
                     </c:forEach>
-
                 </select>
                 <div class="invalid-feedback">
                     Please select an owner.
                 </div>
             </div>
-
         </div>
 
         <hr class="mb-4">
-        <input type="hidden" name="car_id" value="${car.id}" />
+        <input type="hidden" name="car_id" value="${car.id}"/>
         <button class="w-100 btn btn-primary btn-lg" type="submit">Save Changes</button>
-
     </form>
-
-    <script src="${pageContext.request.contextPath}/scripts/form_validation.js"></script>
 
 </t:pageTemplate>

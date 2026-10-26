@@ -1,33 +1,34 @@
 package org.example.parkinglot.ejb;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.ejb.Stateless;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import jakarta.inject.Inject;
+import jakarta.security.enterprise.identitystore.Pbkdf2PasswordHash;
+import org.example.parkinglot.security.SecurityConfig;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Stateless
 public class PasswordBean {
-    private static final Logger LOG = Logger.getLogger(PasswordBean.class.getName());
 
-    public String convertToSha256(String password) {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            messageDigest.update(password.getBytes(StandardCharsets.UTF_8));
-            byte[] digest = messageDigest.digest();
-            final StringBuilder hexString = new StringBuilder();
-            for (int i = 0; i < digest.length; i++) {
-                final String hex = Integer.toHexString(0xff & digest[i]);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException ex) {
-            LOG.log(Level.SEVERE, "Could not convert password", ex);
+    @Inject
+    Pbkdf2PasswordHash passwordHash;
+
+    @PostConstruct
+    void init() {
+        Map<String, String> parameters = new HashMap<>();
+        for (String parameter : SecurityConfig.HASH_PARAMETERS) {
+            String[] keyValue = parameter.split("=", 2);
+            parameters.put(keyValue[0], keyValue[1]);
         }
-        return null;
+        passwordHash.initialize(parameters);
+    }
+
+    /**
+     * Returns a salted PBKDF2 hash, in the format the login identity store expects.
+     */
+    public String hash(String password) {
+        return passwordHash.generate(password.toCharArray());
     }
 }
