@@ -12,6 +12,7 @@ repositories {
 
 ext {
     junitVersion = '5.10.2'
+    testcontainersVersion = '2.0.5'
 }
 
 sourceCompatibility = '21'
@@ -19,6 +20,18 @@ targetCompatibility = '21'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+
+// Integration tests live in src/integrationTest: they start the real app in Docker and talk to it over HTTP
+sourceSets {
+    integrationTest {
+        java.srcDir 'src/integrationTest/java'
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 dependencies {
@@ -31,10 +44,24 @@ dependencies {
     testImplementation('jakarta.platform:jakarta.jakartaee-api:10.0.0')
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+
+    integrationTestImplementation("org.testcontainers:testcontainers:${testcontainersVersion}")
+    integrationTestImplementation("org.testcontainers:testcontainers-postgresql:${testcontainersVersion}")
 }
 
 test {
     useJUnitPlatform()
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Starts Payara and PostgreSQL in Docker with the built WAR and tests the app over HTTP.'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
+    dependsOn tasks.named('war')
+    shouldRunAfter tasks.named('test')
+    systemProperty 'parkpulse.war', layout.buildDirectory.file('libs/parkpulse.war').get().asFile.absolutePath
 }
 
 war {

@@ -54,4 +54,9 @@ src/main/webapp/WEB-INF/pages   JSP views
 1. Build the WAR file with `./gradlew war`.
 2. Deploy `build/libs/parkpulse.war` on a Jakarta EE 10 or 11 server (tested on Payara 7) with these environment variables: `PARKPULSE_DB_URL` (for example `jdbc:postgresql://localhost:5432/parkpulse`), `PARKPULSE_DB_USER` and `PARKPULSE_DB_PASSWORD`. The PostgreSQL driver is inside the WAR, JPA creates the tables, and the login needs no server setup.
 
-Run the unit tests with `./gradlew test`.
+## Tests
+
+- `./gradlew test` runs the unit tests (input checks, file type detection, CSRF token comparison). No Docker needed.
+- `./gradlew integrationTest` starts the real app with [Testcontainers](https://testcontainers.com/): Payara and PostgreSQL in Docker, with the freshly built WAR. The tests then use it like a browser: log in as each demo user, try pages they are not allowed to see, send forms without a CSRF token, upload fake and oversized images, and check that user text is escaped.
+
+GitHub Actions runs both on every push (`.github/workflows/ci.yml`).
