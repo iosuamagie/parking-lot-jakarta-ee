@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<payara-web-app>
+    <context-root>/</context-root>
+
+    <session-config>
+        <cookie-properties>
+            <!-- Payara ignores the SameSite attribute from web.xml, so it is set here too -->
+            <property name="cookieSameSite" value="Lax"/>
+        </cookie-properties>
+    </session-config>
+</payara-web-app>

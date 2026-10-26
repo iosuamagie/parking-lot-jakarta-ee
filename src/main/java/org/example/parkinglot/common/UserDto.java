@@ -18,7 +18,9 @@ public class UserDto {
         this.email = email;
     }
 
-    public UserDto(Long id, String username, String email, Collection<String> groupNames) {
+    public UserDto(Long id, String username, String email, Collection<String> groups) {
+        this(id, username, email);
+        this.groups = groups;
     }
 
     public Long getId() {

@@ -3,12 +3,33 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
-    <login-config>
-        <auth-method>FORM</auth-method>
-        <realm-name>jdbcRealmParkingLot</realm-name>
-        <form-login-config>
-            <form-login-page>/Login</form-login-page>
-            <form-error-page>/Login</form-error-page>
-        </form-login-config>
-    </login-config>
+    <!-- Login is configured in code with Jakarta Security, see org.example.parkinglot.security.SecurityConfig -->
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>REST API</web-resource-name>
+            <url-pattern>/resources/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>READ_CARS</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <security-role><role-name>READ_CARS</role-name></security-role>
+    <security-role><role-name>WRITE_CARS</role-name></security-role>
+    <security-role><role-name>READ_USERS</role-name></security-role>
+    <security-role><role-name>WRITE_USERS</role-name></security-role>
+    <security-role><role-name>INVOICING</role-name></security-role>
+
+    <session-config>
+        <cookie-config>
+            <http-only>true</http-only>
+            <attribute>
+                <attribute-name>SameSite</attribute-name>
+                <attribute-value>Lax</attribute-value>
+            </attribute>
+        </cookie-config>
+        <!-- Keep the session id out of URLs -->
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
 </web-app>

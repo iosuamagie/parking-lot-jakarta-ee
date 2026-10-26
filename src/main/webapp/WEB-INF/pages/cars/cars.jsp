@@ -6,15 +6,13 @@
     <h1>Cars</h1>
 
     <form method="POST" action="${pageContext.request.contextPath}/Cars">
+        <t:csrf/>
         <c:if test="${pageContext.request.isUserInRole('WRITE_CARS')}">
 
             <c:choose>
-                <%-- CAZUL 1: Mai sunt locuri libere (> 0) --%>
                 <c:when test="${numberOfFreeParkingSpots > 0}">
                     <a class="btn btn-primary btn-lg" href="${pageContext.request.contextPath}/AddCar">Add Car</a>
                 </c:when>
-
-                <%-- CAZUL 2: Parcarea este plină (0 sau mai puțin) --%>
                 <c:otherwise>
                     <button class="btn btn-secondary btn-lg" type="button" disabled>
                         Parking Full
@@ -25,22 +23,21 @@
 
         </c:if>
 
-
-
         <div class="container text-center mt-3">
             <c:forEach var="car" items="${cars}">
-                <div class="row align-items-center mb-2"> <c:if test="${pageContext.request.isUserInRole('WRITE_CARS')}">
-                    <div class="col-1">
-                        <input type="checkbox" name="car_ids" value="${car.id}" />
-                    </div>
-                </c:if>
+                <div class="row align-items-center mb-2">
+                    <c:if test="${pageContext.request.isUserInRole('WRITE_CARS')}">
+                        <div class="col-1">
+                            <input type="checkbox" name="car_ids" value="${car.id}"/>
+                        </div>
+                    </c:if>
 
-                    <div class="col">${car.licensePlate}</div>
-                    <div class="col">${car.parkingSpot}</div>
-                    <div class="col">${car.ownerName}</div>
+                    <div class="col"><c:out value="${car.licensePlate}"/></div>
+                    <div class="col"><c:out value="${car.parkingSpot}"/></div>
+                    <div class="col"><c:out value="${car.ownerName}"/></div>
 
                     <div class="col">
-                        <img src="${pageContext.request.contextPath}/CarPhotos?id=${car.id}" width="48"/>
+                        <img src="${pageContext.request.contextPath}/CarPhotos?id=${car.id}" width="48" alt=""/>
                     </div>
 
                     <c:if test="${pageContext.request.isUserInRole('WRITE_CARS')}">

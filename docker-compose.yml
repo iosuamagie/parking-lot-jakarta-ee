@@ -1,0 +1,35 @@
+# Start everything with: docker compose up --build
+# Then open http://localhost:8080 (or your PARKPULSE_PORT) and log in as admin, viewer or billing (password: PARKPULSE_DEMO_PASSWORD).
+# The defaults below are for running on your own computer only; set your own values in a .env file otherwise.
+services:
+  db:
+    image: postgres:17.11-alpine
+    environment:
+      POSTGRES_DB: parkpulse
+      POSTGRES_USER: parkpulse
+      POSTGRES_PASSWORD: ${PARKPULSE_DB_PASSWORD:-parkpulse-local}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parkpulse -d parkpulse"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    ports:
+      # Only reachable from this computer; set PARKPULSE_PORT if 8080 is taken
+      - "127.0.0.1:${PARKPULSE_PORT:-8080}:8080"
+    environment:
+      PARKPULSE_DB_URL: jdbc:postgresql://db:5432/parkpulse
+      PARKPULSE_DB_USER: parkpulse
+      PARKPULSE_DB_PASSWORD: ${PARKPULSE_DB_PASSWORD:-parkpulse-local}
+      PARKPULSE_DEMO_DATA: "true"
+      PARKPULSE_DEMO_PASSWORD: ${PARKPULSE_DEMO_PASSWORD:-parkpulse-demo}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

@@ -6,16 +6,15 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import org.example.parkinglot.common.Roles;
 import org.example.parkinglot.common.UserDto;
 import org.example.parkinglot.entities.User;
 import org.example.parkinglot.entities.UserGroup;
-
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @Stateless
 public class UserBean {
@@ -41,98 +40,108 @@ public class UserBean {
     private List<UserDto> copyUsersToDto(List<User> users) {
         List<UserDto> dtoList = new ArrayList<>();
 
-        if (users == null) {
-            return dtoList;
-        }
-
         for (User user : users) {
-            UserDto dto = new UserDto(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getEmail()
-            );
-            dtoList.add(dto);
+            dtoList.add(new UserDto(user.getId(), user.getUsername(), user.getEmail()));
         }
 
         return dtoList;
     }
 
-    public void createUser(String username, String email, String password, Collection<String> groups) {
+    /**
+     * @return the id of the new user
+     */
+    public Long createUser(String username, String email, String password, Collection<String> groups) {
         LOG.info("createUser");
 
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setEmail(email);
-
-        // Hash the password using the injected PasswordBean
-        newUser.setPassword(passwordBean.convertToSha256(password));
+        newUser.setPassword(passwordBean.hash(password));
 
         entityManager.persist(newUser);
 
-        // Assign the groups
         assignGroupsToUser(username, groups);
+        return newUser.getId();
     }
 
-    public void assignGroupToUser(String username, String group) {
-        LOG.info("Assigning group " + group + " to user " + username);
-
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUsername(username);
-        userGroup.setUserGroup(group);
-
-        entityManager.persist(userGroup);
+    public long countUsers() {
+        return entityManager.createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
     }
 
-    // Modified to reuse the logic from assignGroupToUser
+    // The login identity store reads the groups from the usergroups table, by username
     private void assignGroupsToUser(String username, Collection<String> groups) {
-        LOG.info("assignGroupsToUser");
-        if (groups != null) {
-            for (String group : groups) {
-                // Reuse the singular method to avoid duplicating code
-                assignGroupToUser(username, group);
+        for (String group : groups) {
+            if (Roles.ALL.contains(group)) {
+                entityManager.persist(new UserGroup(username, group));
             }
         }
     }
 
-    public Collection<String> findUsernamesByUserIds(Collection<Long> userIds) {
-        List<String> usernames = entityManager.createQuery("SELECT u.username FROM User u WHERE u.id IN :userIds", String.class)
-                .setParameter("userIds", userIds)
+    private List<String> findGroupsByUsername(String username) {
+        return entityManager
+                .createQuery("SELECT g.userGroup FROM UserGroup g WHERE g.username = :username", String.class)
+                .setParameter("username", username)
                 .getResultList();
-        return usernames;
     }
 
-    public void updateUser(Long userId, String username, String email, String password, Collection<String> groups) {
+    /**
+     * @param exceptUserId the user being edited, or {@code null} for a new user
+     */
+    public boolean isUsernameTaken(String username, Long exceptUserId) {
+        return countOthersWith("username", username, exceptUserId) > 0;
+    }
+
+    public boolean isEmailTaken(String email, Long exceptUserId) {
+        return countOthersWith("email", email, exceptUserId) > 0;
+    }
+
+    private long countOthersWith(String field, String value, Long exceptUserId) {
+        // field is one of our own constants, never user input
+        return entityManager
+                .createQuery("SELECT COUNT(u) FROM User u WHERE u." + field + " = :value AND u.id <> :exceptId", Long.class)
+                .setParameter("value", value)
+                .setParameter("exceptId", exceptUserId == null ? 0L : exceptUserId)
+                .getSingleResult();
+    }
+
+    public Collection<String> findUsernamesByUserIds(Collection<Long> userIds) {
+        return entityManager.createQuery("SELECT u.username FROM User u WHERE u.id IN :userIds", String.class)
+                .setParameter("userIds", userIds)
+                .getResultList();
+    }
+
+    /**
+     * @return {@code false} if there is no user with this id
+     */
+    public boolean updateUser(Long userId, String username, String email, String password, Collection<String> groups) {
+        LOG.info("updateUser");
         User user = entityManager.find(User.class, userId);
+        if (user == null) {
+            return false;
+        }
+
+        // The groups are keyed by username, so they are rewritten under the (maybe new) username
+        entityManager.createQuery("DELETE FROM UserGroup g WHERE g.username = :username")
+                .setParameter("username", user.getUsername())
+                .executeUpdate();
 
         user.setUsername(username);
         user.setEmail(email);
 
-        // LOGICA DE PAROLĂ:
-        // Schimbăm parola DOAR dacă utilizatorul a scris ceva în câmp.
+        // An empty password field means "keep the current password"
         if (password != null && !password.isEmpty()) {
-            user.setPassword(passwordBean.convertToSha256(password));
+            user.setPassword(passwordBean.hash(password));
         }
 
-        // Actualizare grupuri
-        user.getGroups().clear();
-        for (String group : groups) {
-            UserGroup userGroup = entityManager.find(UserGroup.class, group);
-            user.addGroup(userGroup);
-        }
+        assignGroupsToUser(username, groups);
+        return true;
     }
 
     public UserDto findById(Long userId) {
-        // 1. Căutăm entitatea User în baza de date după ID
         User user = entityManager.find(User.class, userId);
-
         if (user == null) {
             return null;
         }
-
-        Collection<String> groupNames = user.getGroups().stream()
-                .map(UserGroup::getUserGroup) // Verifică în UserGroup cum se numește câmpul (groupname sau username)
-                .collect(Collectors.toList());
-
-        return new UserDto(user.getId(), user.getUsername(), user.getEmail(), groupNames);
+        return new UserDto(user.getId(), user.getUsername(), user.getEmail(), findGroupsByUsername(user.getUsername()));
     }
 }
