@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.example.parkinglot.common.ActivityDto;
+import org.example.parkinglot.common.LotSnapshotDto;
 import org.example.parkinglot.common.LotStatsDto;
 import org.example.parkinglot.common.ParkedCarDto;
 import org.example.parkinglot.common.TicketDto;
@@ -26,6 +27,8 @@ import java.util.Optional;
 /** Opens and closes parking sessions and answers what the live page and the tickets need. */
 @Stateless
 public class ParkingSessionBean {
+    /** How many lines the activity list of the live page shows. */
+    public static final int ACTIVITY_LIMIT = 20;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -119,6 +122,12 @@ public class ParkingSessionBean {
 
         return new LotStatsDto(Spots.CAPACITY, Spots.CAPACITY - (int) parked, revenueToday, revenueYesterday,
                 (int) carsToday, averageStay);
+    }
+
+    /** The whole lot in one read, for a page that draws it from scratch. */
+    public LotSnapshotDto snapshot() {
+        return new LotSnapshotDto(clock.now(), clock.speed(), Spots.ALL, Spots.ACCESSIBLE, findParked(), stats(),
+                recentActivity(ACTIVITY_LIMIT));
     }
 
     /** The latest entries and exits together, newest first. */

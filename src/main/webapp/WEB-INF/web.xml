@@ -7,8 +7,8 @@
 
     <security-constraint>
         <web-resource-collection>
-            <web-resource-name>REST API</web-resource-name>
-            <url-pattern>/resources/*</url-pattern>
+            <web-resource-name>Cars API</web-resource-name>
+            <url-pattern>/api/cars/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>READ_CARS</role-name>

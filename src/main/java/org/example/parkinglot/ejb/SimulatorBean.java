@@ -10,6 +10,7 @@ import jakarta.ejb.TransactionAttributeType;
 import jakarta.inject.Inject;
 import org.example.parkinglot.common.ActivityDto;
 import org.example.parkinglot.common.ParkedCarDto;
+import org.example.parkinglot.live.LiveHub;
 import org.example.parkinglot.parking.CarLooks;
 import org.example.parkinglot.parking.CarModel;
 import org.example.parkinglot.parking.PlateGenerator;
@@ -42,6 +43,9 @@ public class SimulatorBean {
 
     @Inject
     ParkingClockBean clock;
+
+    @Inject
+    LiveHub liveHub;
 
     private final RandomGenerator random = new SplittableRandom();
     private boolean enabled;
@@ -82,6 +86,8 @@ public class SimulatorBean {
             Optional<ParkedCarDto> entered = letACarIn(parked);
             if (entered.isPresent()) {
                 LOG.fine(() -> "Entered: " + entered.get());
+                liveHub.publish(LiveHub.ENTERED, entered.get());
+                liveHub.publish(LiveHub.STATS, sessions.stats());
                 return;
             }
             // No spot fits this car, so a car leaves instead
@@ -92,6 +98,8 @@ public class SimulatorBean {
         String spot = SimulatorPolicy.pickLeaving(parked, clock.now(), random);
         ActivityDto exited = sessions.exit(spot);
         LOG.fine(() -> "Exited: " + exited);
+        liveHub.publish(LiveHub.EXITED, exited);
+        liveHub.publish(LiveHub.STATS, sessions.stats());
     }
 
     private Optional<ParkedCarDto> letACarIn(List<ParkedCarDto> parked) {

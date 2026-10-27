@@ -10,6 +10,7 @@ import jakarta.persistence.PersistenceContext;
 import org.example.parkinglot.parking.AcceleratedClock;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.Logger;
 
 /**
@@ -66,7 +67,8 @@ public class ParkingClockBean {
 
     @Lock(LockType.READ)
     public Instant now() {
-        return clock.now();
+        // Milliseconds are enough, and every browser can read them
+        return clock.now().truncatedTo(ChronoUnit.MILLIS);
     }
 
     @Lock(LockType.READ)

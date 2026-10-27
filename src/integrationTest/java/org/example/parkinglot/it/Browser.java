@@ -11,9 +11,16 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -107,6 +114,38 @@ final class Browser {
         body.writeBytes(("--" + boundary + "\r\n" + headersAndValue).getBytes(StandardCharsets.UTF_8));
         if (!headersAndValue.endsWith("\r\n\r\n")) {
             body.writeBytes("\r\n".getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    /**
+     * Opens a server-sent events stream and returns its first event (the lines up to the first empty line).
+     */
+    String readFirstSseEvent(String path, Duration timeout) {
+        HttpRequest request = HttpRequest.newBuilder(uri(path)).timeout(timeout)
+                .header("Accept", "text/event-stream").GET().build();
+        CompletableFuture<String> firstEvent = client.sendAsync(request, HttpResponse.BodyHandlers.ofLines())
+                .thenApply(response -> {
+                    try (Stream<String> lines = response.body()) {
+                        StringBuilder event = new StringBuilder();
+                        Iterator<String> iterator = lines.iterator();
+                        while (iterator.hasNext()) {
+                            String line = iterator.next();
+                            if (line.isEmpty() && !event.isEmpty()) {
+                                break;
+                            }
+                            event.append(line).append('\n');
+                        }
+                        return event.toString();
+                    }
+                });
+        try {
+            return firstEvent.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (ExecutionException | TimeoutException ex) {
+            firstEvent.cancel(true);
+            throw new IllegalStateException("No event from " + path, ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(ex);
         }
     }
 

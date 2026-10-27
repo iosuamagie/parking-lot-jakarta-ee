@@ -1,56 +1,55 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<header data-bs-theme="dark">
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="${pageContext.request.contextPath}">Parking Lot</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-
-                <ul class="navbar-nav me-auto mb-2 mb-md-0">
-
-                    <c:if test="${pageContext.request.isUserInRole('READ_USERS')}">
-                        <li class="nav-item">
-                            <a class="nav-link ${pageContext.request.requestURI.substring(pageContext.request.requestURI.lastIndexOf("/")) eq '/users.jsp' ? 'active' : ''}"
-                               aria-current="page"
-                               href="${pageContext.request.contextPath}/Users">Users</a>
-                        </li>
-                    </c:if>
-
-                    <li class="nav-item">
-                        <a class="nav-link ${pageContext.request.requestURI.substring(pageContext.request.requestURI.lastIndexOf("/")) eq '/about.jsp' ? 'active' : ''}"
-                           aria-current="page"
-                           href="${pageContext.request.contextPath}/about.jsp">About</a>
-                    </li>
-
-                    <c:if test="${pageContext.request.isUserInRole('READ_CARS')}">
-                        <li class="nav-item">
-                            <a class="nav-link ${pageContext.request.requestURI.substring(pageContext.request.requestURI.lastIndexOf("/")) eq '/cars.jsp' ? 'active' : ''}"
-                               aria-current="page"
-                               href="${pageContext.request.contextPath}/Cars">Cars</a>
-                        </li>
-                    </c:if>
-
-                </ul>
-
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <c:choose>
-                            <c:when test="${pageContext.request.getRemoteUser() == null}">
-                                <a class="nav-link" href="${pageContext.request.contextPath}/Login">Login</a>
-                            </c:when>
-                            <c:otherwise>
-                                <form method="POST" action="${pageContext.request.contextPath}/Logout" class="d-inline">
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%-- Pages shown by a servlet are forwards, so the address the visitor asked for is in this attribute --%>
+<c:set var="path" value="${empty requestScope['jakarta.servlet.forward.request_uri'] ? pageContext.request.requestURI : requestScope['jakarta.servlet.forward.request_uri']}"/>
+<header class="pp-top">
+    <a class="pp-brand" href="${ctx}/">
+        <svg width="26" height="26" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+            <rect width="8" height="8" fill="#4f46e5"/>
+            <rect x="2" y="1" width="3" height="1" fill="#fff"/><rect x="2" y="2" width="1" height="5" fill="#fff"/>
+            <rect x="5" y="2" width="1" height="2" fill="#fff"/><rect x="3" y="4" width="2" height="1" fill="#fff"/>
+        </svg>
+        ParkPulse
+    </a>
+    <nav aria-label="Meniu">
+        <ul class="pp-nav">
+            <li><a class="pp-pill ${path eq ctx.concat('/') or path.endsWith('/index.jsp') ? 'active' : ''}" href="${ctx}/">Live</a></li>
+            <li><a class="pp-pill ${path.endsWith('/api-docs') ? 'active' : ''}" href="${ctx}/api-docs">API</a></li>
+            <c:if test="${pageContext.request.isUserInRole('READ_CARS')}">
+                <li><a class="pp-pill ${path.endsWith('/Cars') ? 'active' : ''}" href="${ctx}/Cars">Mașini</a></li>
+            </c:if>
+            <c:if test="${pageContext.request.isUserInRole('READ_USERS')}">
+                <li><a class="pp-pill ${path.endsWith('/Users') ? 'active' : ''}" href="${ctx}/Users">Useri</a></li>
+            </c:if>
+            <c:if test="${pageContext.request.isUserInRole('INVOICING')}">
+                <li><a class="pp-pill ${path.endsWith('/billing') ? 'active' : ''}" href="${ctx}/billing">Încasări</a></li>
+            </c:if>
+            <li>
+                <c:choose>
+                    <c:when test="${pageContext.request.remoteUser == null}">
+                        <a class="pp-pill pp-pill-primary" href="${ctx}/Login">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                            Autentificare
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="dropdown">
+                            <button class="pp-pill active dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                                <c:out value="${pageContext.request.remoteUser}"/>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <form method="POST" action="${ctx}/Logout">
                                     <t:csrf/>
-                                    <button type="submit" class="nav-link btn btn-link">Logout</button>
+                                    <button type="submit" class="dropdown-item">Logout</button>
                                 </form>
-                            </c:otherwise>
-                        </c:choose>
-                    </li>
-                </ul>
-            </div>
-        </div>
+                            </div>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </li>
+        </ul>
     </nav>
 </header>

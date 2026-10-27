@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -24,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ParkPulseIT {
     private static final Pattern PHOTO_LINK = Pattern.compile("AddCarPhoto\\?id=(\\d+)");
     private static final Pattern OWNER_OPTION = Pattern.compile("<option value=\"(\\d+)\"");
+    private static final Pattern FIRST_ACTIVITY_TIME = Pattern.compile("\"activity\":\\[\\{[^}]*?\"at\":\"([^\"]+)\"");
 
     @BeforeAll
     static void startTheApp() {
@@ -41,7 +44,7 @@ class ParkPulseIT {
 
     @Test
     void theApiNeedsALogin() {
-        HttpResponse<String> response = new Browser(ParkPulseServer.baseUrl()).get("/resources/cars");
+        HttpResponse<String> response = new Browser(ParkPulseServer.baseUrl()).get("/api/cars");
         assertFalse(response.body().contains("licensePlate"));
     }
 
@@ -136,15 +139,62 @@ class ParkPulseIT {
         assertEquals(404, admin.get("/EditCar?id=abc").statusCode());
         assertEquals(404, admin.get("/EditCar?id=999999").statusCode());
         assertEquals(404, admin.get("/EditUser?id=-1").statusCode());
-        assertEquals(404, admin.get("/resources/cars/999999").statusCode());
+        assertEquals(404, admin.get("/api/cars/999999").statusCode());
     }
 
     @Test
     void theApiReturnsCarsAsJson() {
-        HttpResponse<String> response = Browser.loggedInAs("viewer").get("/resources/cars");
+        HttpResponse<String> response = Browser.loggedInAs("viewer").get("/api/cars");
         assertEquals(200, response.statusCode());
         assertTrue(response.headers().firstValue("Content-Type").orElse("").startsWith("application/json"));
         assertTrue(response.body().contains("\"licensePlate\":\"SB-01-PKP\""));
+    }
+
+    @Test
+    void theCarsApiStillNeedsALogin() {
+        assertFalse(new Browser(ParkPulseServer.baseUrl()).get("/api/cars").body().contains("licensePlate"));
+    }
+
+    // --- The public live lot ---
+
+    @Test
+    void theLotIsPublicAndHasNoSessionCookie() {
+        HttpResponse<String> response = new Browser(ParkPulseServer.baseUrl()).get("/api/lot");
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("\"clockSpeed\":60"));
+        assertTrue(response.body().contains("\"A01\""));
+        assertTrue(response.headers().allValues("Set-Cookie").stream().noneMatch(c -> c.startsWith("JSESSIONID")));
+    }
+
+    @Test
+    void theLiveFeedStartsWithASnapshot() {
+        String first = new Browser(ParkPulseServer.baseUrl()).readFirstSseEvent("/api/events", Duration.ofSeconds(10));
+        assertTrue(first.contains("event: snapshot"), first);
+        assertTrue(first.contains("\"cars\""), first);
+    }
+
+    @Test
+    void theSimulatorParksCars() throws InterruptedException {
+        Browser browser = new Browser(ParkPulseServer.baseUrl());
+        Instant first = latestActivity(browser);
+        Instant deadline = Instant.now().plusSeconds(30);
+        while (!latestActivity(browser).isAfter(first)) {
+            assertTrue(Instant.now().isBefore(deadline), "No car moved in 30 seconds");
+            Thread.sleep(2000);
+        }
+    }
+
+    private static Instant latestActivity(Browser browser) {
+        Matcher matcher = FIRST_ACTIVITY_TIME.matcher(browser.get("/api/lot").body());
+        assertTrue(matcher.find(), "The lot has no activity");
+        return Instant.parse(matcher.group(1));
+    }
+
+    @Test
+    void theHomePageIsTheLiveLotForEveryone() {
+        String body = new Browser(ParkPulseServer.baseUrl()).get("/").body();
+        assertTrue(body.contains("id=\"lot\""));
+        assertTrue(body.contains("Autentificare"));
     }
 
     // --- Photo uploads ---
