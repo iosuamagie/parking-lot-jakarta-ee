@@ -27,6 +27,7 @@ class ParkPulseIT {
     private static final Pattern PHOTO_LINK = Pattern.compile("AddCarPhoto\\?id=(\\d+)");
     private static final Pattern OWNER_OPTION = Pattern.compile("<option value=\"(\\d+)\"");
     private static final Pattern PARKED_TICKET_CODE = Pattern.compile("\"cars\":\\[\\{[^}]*?\"ticketCode\":\"([A-Za-z0-9_-]{22})\"");
+    private static final Pattern EXITED_TICKET_CODE = Pattern.compile("\"ticketCode\":\"([A-Za-z0-9_-]{22})\",\"type\":\"exited\"");
     private static final Pattern FIRST_ACTIVITY_TIME = Pattern.compile("\"activity\":\\[\\{[^}]*?\"at\":\"([^\"]+)\"");
 
     @BeforeAll
@@ -245,6 +246,26 @@ class ParkPulseIT {
         HttpResponse<String> response = browser.get("/bilet/" + code);
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("data-ticket-code=\"" + code + "\""));
+    }
+
+    @Test
+    void aReceiptIsAPdfForAFinishedTicket() {
+        Browser browser = new Browser(ParkPulseServer.baseUrl());
+        Matcher matcher = EXITED_TICKET_CODE.matcher(browser.get("/api/lot").body());
+        assertTrue(matcher.find(), "No car has left yet");
+        HttpResponse<byte[]> response = browser.getBytes("/api/tickets/" + matcher.group(1) + "/receipt.pdf");
+        assertEquals(200, response.statusCode());
+        assertEquals("application/pdf", response.headers().firstValue("Content-Type").orElse(""));
+        assertTrue(response.headers().firstValue("Content-Disposition").orElse("").contains("chitanta-PP-"));
+        assertEquals("%PDF", new String(response.body(), 0, 4, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    void aReceiptForAParkedCarIsAConflict() {
+        Browser browser = new Browser(ParkPulseServer.baseUrl());
+        HttpResponse<String> response = browser.get("/api/tickets/" + aParkedTicketCode(browser) + "/receipt.pdf");
+        assertEquals(409, response.statusCode());
+        assertTrue(response.body().contains("Chitanța apare după ieșire"));
     }
 
     // --- Photo uploads ---

@@ -41,6 +41,9 @@ dependencies {
     implementation('org.postgresql:postgresql:42.7.14')
     // QR codes for the parking tickets
     implementation('com.google.zxing:core:3.5.4')
+    // PDF receipts and reports; the extra fonts have the Romanian letters (ă, ș, ț)
+    implementation('com.github.librepdf:openpdf:3.0.5')
+    implementation('com.github.librepdf:openpdf-fonts-extra:3.0.5')
 
     // The server provides the Jakarta EE classes at runtime; the tests need them on their own classpath
     testImplementation('jakarta.platform:jakarta.jakartaee-api:10.0.0')

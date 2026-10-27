@@ -77,6 +77,17 @@ final class Browser {
         return send(HttpRequest.newBuilder(uri(path)).GET().build());
     }
 
+    HttpResponse<byte[]> getBytes(String path) {
+        try {
+            return client.send(HttpRequest.newBuilder(uri(path)).GET().build(), HttpResponse.BodyHandlers.ofByteArray());
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(ex);
+        }
+    }
+
     /**
      * Posts a form, adding the CSRF token from the session when {@code withCsrfToken} is true.
      */

@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.example.parkinglot.common.TicketDto;
 import org.example.parkinglot.documents.QrSvg;
+import org.example.parkinglot.documents.ReceiptPdf;
 import org.example.parkinglot.ejb.ParkingSessionBean;
 
 /**
@@ -21,6 +22,7 @@ import org.example.parkinglot.ejb.ParkingSessionBean;
 @Path("/tickets")
 public class TicketsResource {
     private static final String SVG = "image/svg+xml";
+    private static final String PDF = "application/pdf";
 
     @Inject
     ParkingSessionBean parkingSessionBean;
@@ -45,6 +47,23 @@ public class TicketsResource {
         cache.setMaxAge(24 * 60 * 60);
         return Response.ok(QrSvg.svg(publicUrl() + "/bilet/" + ticket.ticketCode()), SVG)
                 .cacheControl(cache)
+                .build();
+    }
+
+    /** The receipt exists only after the car has left and paid. */
+    @GET
+    @Path("/{code}/receipt.pdf")
+    @Produces({PDF, MediaType.TEXT_PLAIN})
+    public Response receipt(@PathParam("code") String code) {
+        TicketDto ticket = find(code);
+        if (ticket.exitedAt() == null) {
+            return Response.status(Response.Status.CONFLICT)
+                    .type(MediaType.TEXT_PLAIN_TYPE.withCharset("UTF-8"))
+                    .entity("Chitanța apare după ieșire")
+                    .build();
+        }
+        return Response.ok(ReceiptPdf.render(ticket), PDF)
+                .header("Content-Disposition", "attachment; filename=\"chitanta-" + ticket.ticketNumber() + ".pdf\"")
                 .build();
     }
 
