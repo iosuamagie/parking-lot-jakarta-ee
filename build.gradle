@@ -65,6 +65,8 @@ tasks.register('integrationTest', Test) {
     classpath = sourceSets.integrationTest.runtimeClasspath
     useJUnitPlatform()
     dependsOn tasks.named('war')
+    // A new WAR means the tests must run again, even when the test code did not change
+    inputs.file(tasks.named('war').flatMap { it.archiveFile })
     shouldRunAfter tasks.named('test')
     systemProperty 'parkpulse.war', layout.buildDirectory.file('libs/parkpulse.war').get().asFile.absolutePath
 }

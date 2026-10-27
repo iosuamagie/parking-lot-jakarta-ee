@@ -3,6 +3,7 @@ package org.example.parkinglot.ejb;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.Lock;
 import jakarta.ejb.LockType;
+import jakarta.ejb.Schedule;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
 import jakarta.persistence.EntityManager;
@@ -63,6 +64,13 @@ public class ParkingClockBean {
         LOG.warning("PARKPULSE_CLOCK_SPEED must be a whole number of at least 1, so the default "
                 + DEFAULT_SPEED + " is used");
         return DEFAULT_SPEED;
+    }
+
+    /** Regular readings keep the gaps short, so only a sleeping computer makes a long one. */
+    @Schedule(hour = "*", minute = "*", second = "*/5", persistent = false)
+    @Lock(LockType.READ)
+    void keepTime() {
+        clock.now();
     }
 
     @Lock(LockType.READ)
