@@ -71,6 +71,15 @@ public class ParkingSessionBean {
         return toExited(session);
     }
 
+    /** Saves ready-made sessions (the demo history) in one transaction. */
+    public void importHistory(List<ParkingSession> history) {
+        history.forEach(entityManager::persist);
+    }
+
+    public long countSessions() {
+        return entityManager.createQuery("SELECT COUNT(s) FROM ParkingSession s", Long.class).getSingleResult();
+    }
+
     public List<ParkedCarDto> findParked() {
         return entityManager.createQuery(
                         "SELECT s FROM ParkingSession s WHERE s.exitedAt IS NULL ORDER BY s.spot", ParkingSession.class)

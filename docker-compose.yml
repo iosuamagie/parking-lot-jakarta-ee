@@ -27,6 +27,8 @@ services:
       PARKPULSE_DB_PASSWORD: ${PARKPULSE_DB_PASSWORD:-parkpulse-local}
       PARKPULSE_DEMO_DATA: "true"
       PARKPULSE_DEMO_PASSWORD: ${PARKPULSE_DEMO_PASSWORD:-parkpulse-demo}
+      PARKPULSE_SIMULATOR: "true"
+      PARKPULSE_CLOCK_SPEED: "60"
     depends_on:
       db:
         condition: service_healthy

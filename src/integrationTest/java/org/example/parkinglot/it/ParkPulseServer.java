@@ -57,6 +57,7 @@ final class ParkPulseServer {
                 .withEnv("PARKPULSE_DB_PASSWORD", "integration-db")
                 .withEnv("PARKPULSE_DEMO_DATA", "true")
                 .withEnv("PARKPULSE_DEMO_PASSWORD", DEMO_PASSWORD)
+                .withEnv("PARKPULSE_SIMULATOR", "true")
                 .withCopyFileToContainer(MountableFile.forHostPath(war), "/opt/payara/deployments/parkpulse.war")
                 .withExposedPorts(8080)
                 // Payara says it started before the app is deployed, so wait for a real page
