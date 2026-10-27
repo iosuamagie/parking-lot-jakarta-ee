@@ -29,6 +29,8 @@ services:
       PARKPULSE_DEMO_PASSWORD: ${PARKPULSE_DEMO_PASSWORD:-parkpulse-demo}
       PARKPULSE_SIMULATOR: "true"
       PARKPULSE_CLOCK_SPEED: "60"
+      # The address in the ticket QR codes; empty means the address the page was opened with
+      PARKPULSE_PUBLIC_URL: ${PARKPULSE_PUBLIC_URL:-}
     depends_on:
       db:
         condition: service_healthy

@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ParkPulseIT {
     private static final Pattern PHOTO_LINK = Pattern.compile("AddCarPhoto\\?id=(\\d+)");
     private static final Pattern OWNER_OPTION = Pattern.compile("<option value=\"(\\d+)\"");
+    private static final Pattern PARKED_TICKET_CODE = Pattern.compile("\"cars\":\\[\\{[^}]*?\"ticketCode\":\"([A-Za-z0-9_-]{22})\"");
     private static final Pattern FIRST_ACTIVITY_TIME = Pattern.compile("\"activity\":\\[\\{[^}]*?\"at\":\"([^\"]+)\"");
 
     @BeforeAll
@@ -195,6 +196,55 @@ class ParkPulseIT {
         String body = new Browser(ParkPulseServer.baseUrl()).get("/").body();
         assertTrue(body.contains("id=\"lot\""));
         assertTrue(body.contains("Autentificare"));
+    }
+
+    // --- Tickets ---
+
+    private static String aParkedTicketCode(Browser browser) {
+        Matcher matcher = PARKED_TICKET_CODE.matcher(browser.get("/api/lot").body());
+        assertTrue(matcher.find(), "No car is parked");
+        return matcher.group(1);
+    }
+
+    @Test
+    void aTicketIsPublicByItsCode() {
+        Browser browser = new Browser(ParkPulseServer.baseUrl());
+        String code = aParkedTicketCode(browser);
+        HttpResponse<String> response = browser.get("/api/tickets/" + code);
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("\"ticketNumber\":\"PP-"));
+        assertTrue(response.body().contains("\"plate\":\""));
+    }
+
+    @Test
+    void aBadTicketCodeIsNotFound() {
+        Browser browser = new Browser(ParkPulseServer.baseUrl());
+        assertEquals(404, browser.get("/api/tickets/abc").statusCode());
+        assertEquals(404, browser.get("/api/tickets/" + "x".repeat(500)).statusCode());
+        assertEquals(404, browser.get("/api/tickets/AAAAAAAAAAAAAAAAAAAAAA").statusCode());
+        assertEquals(404, browser.get("/api/tickets/abc/qr.svg").statusCode());
+        assertEquals(404, browser.get("/bilet/AAAAAAAAAAAAAAAAAAAAAA").statusCode());
+        assertEquals(404, browser.get("/bilet/").statusCode());
+        // Payara itself turns down encoded slashes, before the request reaches the app
+        assertEquals(400, browser.get("/bilet/..%2F..%2Fetc").statusCode());
+    }
+
+    @Test
+    void theQrCodeIsAnSvg() {
+        Browser browser = new Browser(ParkPulseServer.baseUrl());
+        HttpResponse<String> response = browser.get("/api/tickets/" + aParkedTicketCode(browser) + "/qr.svg");
+        assertEquals(200, response.statusCode());
+        assertTrue(response.headers().firstValue("Content-Type").orElse("").startsWith("image/svg+xml"));
+        assertTrue(response.body().contains("qr-row"));
+    }
+
+    @Test
+    void theTicketPageOpensForEveryone() {
+        Browser browser = new Browser(ParkPulseServer.baseUrl());
+        String code = aParkedTicketCode(browser);
+        HttpResponse<String> response = browser.get("/bilet/" + code);
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("data-ticket-code=\"" + code + "\""));
     }
 
     // --- Photo uploads ---

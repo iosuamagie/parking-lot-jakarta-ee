@@ -1,11 +1,11 @@
 // Starts the live page: listens to the server-sent events and keeps the map, the cards and the activity list current.
 import { createLot } from './lot-renderer.js';
-import { spotAt, W, H } from './lot-geometry.js';
+import { spotAt, spotRect, W, H } from './lot-geometry.js';
+import { openTicket, ticketExited, showToast } from './ticket-popup.js';
 import { formatLei } from './tariff.js';
 
 const ACTIVITY_LIMIT = 20;
-const root = document.getElementById('live');
-const ctx = root.dataset.ctx || '';
+const ctx = document.body.dataset.ctx || '';
 const canvas = document.getElementById('lot');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lot = createLot(canvas, { reducedMotion });
@@ -119,6 +119,7 @@ function onExited(activity) {
   syncClock(activity.at, clock.speed);
   if (!document.hidden) lot.carExited(activity);
   addActivity(activity);
+  ticketExited(activity);
 }
 
 function setLive(isLive) {
@@ -164,17 +165,29 @@ canvas.addEventListener('mousemove', e => {
   canvas.style.cursor = parkedBySpot.has(spotFromEvent(e)) ? 'pointer' : 'default';
 });
 
-/** Other scripts (the ticket popup) listen to this to open a ticket. */
+/** Where a spot is on the screen, so the ticket can grow out of it. */
+function spotOnScreen(spot) {
+  const r = spotRect(spot);
+  const box = canvas.getBoundingClientRect();
+  const k = box.width / W;
+  return { left: box.left + r.x * k, top: box.top + r.y * k, width: r.w * k, height: r.h * k };
+}
+
 function choose(spot, code, origin) {
+  openTicket(code, origin);
   lot.select(spot);
-  root.dispatchEvent(new CustomEvent('ticket:open', { detail: { spot, code, origin } }));
 }
 
 canvas.addEventListener('click', e => {
   const spot = spotFromEvent(e);
+  if (!spot) return;
   const car = parkedBySpot.get(spot);
-  if (car) choose(spot, car.ticketCode, { x: e.clientX, y: e.clientY });
-  else lot.select(null);
+  if (car) {
+    choose(spot, car.ticketCode, spotOnScreen(spot));
+  } else {
+    lot.select(null);
+    showToast(`Locul ${spot} e liber`);
+  }
 });
 
 $('activity').addEventListener('click', e => {
@@ -189,7 +202,7 @@ $('activity').addEventListener('keydown', e => {
   }
 });
 
-root.addEventListener('ticket:closed', () => lot.select(null));
+document.addEventListener('ticket:closed', () => lot.select(null));
 
 connect();
 tickClock();

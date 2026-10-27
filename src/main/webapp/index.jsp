@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:pageTemplate pageTitle="ParkPulse · parcarea live" bodyClass="pp-page-live">
-    <div class="pp-live-grid" id="live" data-ctx="${pageContext.request.contextPath}">
+    <div class="pp-live-grid" id="live">
 
         <section class="pp-kpis" aria-label="Cifrele zilei">
             <div class="pp-kpi">
