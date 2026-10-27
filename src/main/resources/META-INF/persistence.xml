@@ -9,6 +9,7 @@
         <class>org.example.parkinglot.entities.Car</class>
         <class>org.example.parkinglot.entities.CarPhoto</class>
         <class>org.example.parkinglot.entities.UserGroup</class>
+        <class>org.example.parkinglot.entities.ParkingSession</class>
         <properties>
             <property name="jakarta.persistence.schema-generation.database.action" value="create-or-extend-tables" />
         </properties>
