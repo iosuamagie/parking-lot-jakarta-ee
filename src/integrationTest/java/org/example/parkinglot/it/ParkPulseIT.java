@@ -65,7 +65,7 @@ class ParkPulseIT {
         String cars = admin.get("/Cars").body();
         assertTrue(cars.contains("Add Car"));
         assertTrue(cars.contains("SB-01-PKP"));
-        assertTrue(admin.get("/Users").body().contains("Invoice"));
+        assertTrue(admin.get("/Users").body().contains("Add User"));
     }
 
     @Test
@@ -76,13 +76,48 @@ class ParkPulseIT {
         assertFalse(cars.contains("Add Car"));
         assertEquals(403, viewer.get("/AddCar").statusCode());
         assertEquals(403, viewer.get("/EditUser?id=1").statusCode());
-        assertEquals(403, viewer.post("/Users", Map.of(), true).statusCode());
+        // The old invoice form is gone, so nobody can POST to the user list any more
+        assertEquals(405, viewer.post("/Users", Map.of(), true).statusCode());
+    }
+
+    // --- Billing ---
+
+    @Test
+    void billingSeesTheBillingPage() {
+        String page = Browser.loggedInAs("billing").get("/billing").body();
+        assertTrue(page.contains("Raport PDF pe perioadă"), page);
+        assertTrue(page.contains("PP-"), page);
     }
 
     @Test
-    void billingCanPickUsersForAnInvoice() {
+    void viewerCannotSeeBilling() {
+        Browser viewer = Browser.loggedInAs("viewer");
+        assertEquals(403, viewer.get("/billing").statusCode());
+        assertEquals(403, viewer.get("/api/billing/tickets").statusCode());
+    }
+
+    @Test
+    void badBillingDatesGiveBadRequest() {
         Browser billing = Browser.loggedInAs("billing");
-        assertEquals(302, billing.post("/Users", Map.of(), true).statusCode());
+        assertEquals(400, billing.get("/api/billing/tickets?from=ieri&to=2026-10-27").statusCode());
+        assertEquals(400, billing.get("/api/billing/tickets?from=2026-10-27&to=2026-10-01").statusCode());
+        assertEquals(400, billing.get("/api/billing/report.pdf?from=2020-01-01&to=2026-10-27").statusCode());
+        assertEquals(400, billing.get("/billing?period=custom&from=ieri&to=azi").statusCode());
+    }
+
+    @Test
+    void theBillingApiListsPaidTickets() {
+        HttpResponse<String> response = Browser.loggedInAs("billing").get("/api/billing/tickets");
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("\"items\":[{"), response.body());
+        assertFalse(response.body().contains("\"total\":0,"), response.body());
+    }
+
+    @Test
+    void theReportIsAPdf() {
+        HttpResponse<byte[]> response = Browser.loggedInAs("billing").getBytes("/api/billing/report.pdf");
+        assertEquals(200, response.statusCode());
+        assertEquals("%PDF", new String(response.body(), 0, 4, StandardCharsets.US_ASCII));
     }
 
     // --- Sessions and CSRF ---
