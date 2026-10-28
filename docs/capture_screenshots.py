@@ -68,8 +68,8 @@ def click_longest_parked(page):
 
 def main():
     with sync_playwright() as p:
-        browser = p.chromium.launch(args=['--lang=ro-RO'])
-        context = browser.new_context(viewport=VIEWPORT, device_scale_factor=1, locale='ro-RO',
+        browser = p.chromium.launch(args=['--lang=en-GB'])
+        context = browser.new_context(viewport=VIEWPORT, device_scale_factor=1, locale='en-GB',
                                       timezone_id='Europe/Bucharest')
         page = context.new_page()
 

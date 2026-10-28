@@ -118,7 +118,7 @@ public class Billing extends HttpServlet {
             Map<String, Object> bar = new LinkedHashMap<>();
             boolean isToday = day.day().equals(today);
             String label = shortPeriod ? WEEKDAYS[day.day().getDayOfWeek().ordinal()] : String.valueOf(day.day().getDayOfMonth());
-            bar.put("label", isToday ? "Azi" : label);
+            bar.put("label", isToday ? "Today" : label);
             bar.put("height", max == 0 ? 0 : Math.max(2, Math.round(100f * day.totalBani() / max)));
             bar.put("today", isToday);
             bar.put("title", DAY_MONTH.format(day.day()) + ": " + Tariff.format(day.totalBani()) + ", " + day.tickets() + " tickets");

@@ -11,9 +11,9 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @ApplicationPath("/api")
 @OpenAPIDefinition(
         info = @Info(title = "ParkPulse API", version = "1.0", description = """
-                API-ul parcării publice simulate ParkPulse. Parcarea, fluxul live și biletele sunt publice \
-                (codul biletului e secret, ca un bilet de hârtie). Mașinile cer rolul READ_CARS, iar încasările \
-                rolul INVOICING: autentifică-te întâi în aplicație, în același browser."""),
+                The API of the simulated ParkPulse public parking lot. The lot, the live feed and the tickets are \
+                public (a ticket's code is its secret, like a paper ticket). Cars need the role READ_CARS and \
+                billing the role INVOICING: sign in to the app first, in the same browser."""),
         // A relative address, so "Try it" calls the server the page was opened from
         servers = @Server(url = "/"),
         tags = {
