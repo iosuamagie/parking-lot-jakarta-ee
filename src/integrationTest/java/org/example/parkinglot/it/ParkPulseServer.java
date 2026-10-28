@@ -57,10 +57,11 @@ final class ParkPulseServer {
                 .withEnv("PARKPULSE_DB_PASSWORD", "integration-db")
                 .withEnv("PARKPULSE_DEMO_DATA", "true")
                 .withEnv("PARKPULSE_DEMO_PASSWORD", DEMO_PASSWORD)
+                .withEnv("PARKPULSE_SIMULATOR", "true")
                 .withCopyFileToContainer(MountableFile.forHostPath(war), "/opt/payara/deployments/parkpulse.war")
                 .withExposedPorts(8080)
                 // Payara says it started before the app is deployed, so wait for a real page
-                .waitingFor(Wait.forHttp("/Login").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(5)));
+                .waitingFor(Wait.forHttp("/api/lot").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(5)));
         payara.start();
         // Testcontainers stops both containers when the test JVM exits
     }

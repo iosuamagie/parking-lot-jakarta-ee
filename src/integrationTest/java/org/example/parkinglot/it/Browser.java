@@ -11,9 +11,16 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,6 +77,17 @@ final class Browser {
         return send(HttpRequest.newBuilder(uri(path)).GET().build());
     }
 
+    HttpResponse<byte[]> getBytes(String path) {
+        try {
+            return client.send(HttpRequest.newBuilder(uri(path)).GET().build(), HttpResponse.BodyHandlers.ofByteArray());
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(ex);
+        }
+    }
+
     /**
      * Posts a form, adding the CSRF token from the session when {@code withCsrfToken} is true.
      */
@@ -110,11 +128,47 @@ final class Browser {
         }
     }
 
+    /**
+     * Opens a server-sent events stream and returns its first event (the lines up to the first empty line).
+     */
+    String readFirstSseEvent(String path, Duration timeout) {
+        HttpRequest request = HttpRequest.newBuilder(uri(path)).timeout(timeout)
+                .header("Accept", "text/event-stream").GET().build();
+        CompletableFuture<String> firstEvent = client.sendAsync(request, HttpResponse.BodyHandlers.ofLines())
+                .thenApply(response -> {
+                    try (Stream<String> lines = response.body()) {
+                        StringBuilder event = new StringBuilder();
+                        Iterator<String> iterator = lines.iterator();
+                        while (iterator.hasNext()) {
+                            String line = iterator.next();
+                            if (line.isEmpty() && !event.isEmpty()) {
+                                break;
+                            }
+                            event.append(line).append('\n');
+                        }
+                        return event.toString();
+                    }
+                });
+        try {
+            return firstEvent.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (ExecutionException | TimeoutException ex) {
+            firstEvent.cancel(true);
+            throw new IllegalStateException("No event from " + path, ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(ex);
+        }
+    }
+
     String csrfToken() {
-        // Any page with a form shows the token; the logout button is on every page for logged in users
-        Matcher matcher = CSRF_TOKEN.matcher(get("/Login").body());
+        // Logged in users have the logout form (with the token) in the menu of every page;
+        // other visitors find it in the login form, which a protected page shows
+        Matcher matcher = CSRF_TOKEN.matcher(get("/").body());
         if (!matcher.find()) {
-            throw new IllegalStateException("No CSRF token on the page");
+            matcher = CSRF_TOKEN.matcher(get("/Account").body());
+            if (!matcher.find()) {
+                throw new IllegalStateException("No CSRF token on the page");
+            }
         }
         return matcher.group(1);
     }

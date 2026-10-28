@@ -7,11 +7,21 @@
 
     <security-constraint>
         <web-resource-collection>
-            <web-resource-name>REST API</web-resource-name>
-            <url-pattern>/resources/*</url-pattern>
+            <web-resource-name>Cars API</web-resource-name>
+            <url-pattern>/api/cars/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>READ_CARS</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Billing API</web-resource-name>
+            <url-pattern>/api/billing/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>INVOICING</role-name>
         </auth-constraint>
     </security-constraint>
 

@@ -19,7 +19,8 @@ import java.util.Base64;
  * Protects every POST form against CSRF: the form must send back the random token kept in the session.
  * Forms add the token with the {@code <t:csrf/>} tag. It also renews the session id after login.
  */
-@WebFilter(urlPatterns = "/*", dispatcherTypes = {DispatcherType.REQUEST, DispatcherType.FORWARD})
+@WebFilter(urlPatterns = "/*", asyncSupported = true,
+        dispatcherTypes = {DispatcherType.REQUEST, DispatcherType.FORWARD})
 public class CsrfFilter extends HttpFilter {
     public static final String TOKEN_NAME = "csrfToken";
     public static final String PARAMETER_NAME = "_csrf";
@@ -30,6 +31,11 @@ public class CsrfFilter extends HttpFilter {
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        // The JSON API has no forms and must not give every visitor of the live page a session
+        if (isApi(request.getServletPath())) {
+            chain.doFilter(request, response);
+            return;
+        }
         renewSessionAfterLogin(request);
         String expected = tokenFor(request.getSession());
 
@@ -53,6 +59,14 @@ public class CsrfFilter extends HttpFilter {
             }
         }
         chain.doFilter(request, response);
+    }
+
+    /**
+     * JAX-RS is mapped to /api/*, so its servlet path is exactly "/api". The servlet path is decoded and
+     * normalized by the container, unlike the raw request URI, so tricks like "/api/..;/Users" do not pass.
+     */
+    static boolean isApi(String servletPath) {
+        return "/api".equals(servletPath);
     }
 
     /**

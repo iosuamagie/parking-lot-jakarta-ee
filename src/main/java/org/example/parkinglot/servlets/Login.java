@@ -1,5 +1,6 @@
 package org.example.parkinglot.servlets;
 
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,7 +17,15 @@ public class Login extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getParameter("error") != null) {
+        boolean shownByTheLoginMechanism = request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI) != null;
+        boolean afterAFailedLogin = request.getParameter("error") != null;
+        if (!shownByTheLoginMechanism && !afterAFailedLogin) {
+            // Opened directly: the login must start from a protected page, or after a good password
+            // Jakarta Security has no page to return to and the browser ends up on j_security_check (404)
+            response.sendRedirect(request.getContextPath() + "/Account");
+            return;
+        }
+        if (afterAFailedLogin) {
             request.setAttribute("message", "Username or password incorrect");
         }
         request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);

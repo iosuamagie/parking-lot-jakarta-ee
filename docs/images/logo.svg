@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 110" width="440" height="110" role="img" aria-label="ParkPulse">
+  <style>
+    .name { font: 800 54px system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; letter-spacing: -1.5px; fill: #111827; }
+    .line { fill: none; stroke: rgba(79, 70, 229, .28); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .beat {
+      fill: none; stroke: #4f46e5; stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 24 100; stroke-dashoffset: 24;
+      filter: drop-shadow(0 0 3px rgba(99, 102, 241, .9)) drop-shadow(0 0 8px rgba(20, 184, 166, .55));
+      animation: beat 2.6s cubic-bezier(.45, 0, .55, 1) infinite;
+    }
+    @keyframes beat {
+      0% { stroke-dashoffset: 24; stroke: #6366f1; }
+      55% { stroke: #4f46e5; }
+      75% { stroke-dashoffset: -100; stroke: #14b8a6; }
+      100% { stroke-dashoffset: -100; stroke: #14b8a6; }
+    }
+    @media (prefers-color-scheme: dark) {
+      .name { fill: #f3f4f6; }
+      .line { stroke: rgba(165, 180, 252, .35); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .beat { animation: none; stroke-dashoffset: -100; }
+    }
+  </style>
+  <path class="line" pathLength="100" d="M6 62 H156 Q168 50 180 62 H212 L222 70 L234 22 L246 96 L256 62 H280 Q296 48 312 62 H434"/>
+  <text class="name" x="220" y="74" text-anchor="middle">ParkPulse</text>
+  <path class="beat" pathLength="100" d="M6 62 H156 Q168 50 180 62 H212 L222 70 L234 22 L246 96 L256 62 H280 Q296 48 312 62 H434"/>
+</svg>

@@ -104,12 +104,6 @@ public class UserBean {
                 .getSingleResult();
     }
 
-    public Collection<String> findUsernamesByUserIds(Collection<Long> userIds) {
-        return entityManager.createQuery("SELECT u.username FROM User u WHERE u.id IN :userIds", String.class)
-                .setParameter("userIds", userIds)
-                .getResultList();
-    }
-
     /**
      * @return {@code false} if there is no user with this id
      */
