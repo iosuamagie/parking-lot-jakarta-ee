@@ -2,6 +2,7 @@
 import { amountBani, formatLei } from './tariff.js';
 
 const ctx = document.body.dataset.ctx || '';
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const dateTime = new Intl.DateTimeFormat('ro-RO', {
   timeZone: 'Europe/Bucharest', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
 });
@@ -71,7 +72,7 @@ export function renderTicket(container, ticket, qrSvgText) {
   top.append(head, body);
 
   const bottom = el('div', 'pp-ticket-bottom');
-  const qr = el('div', 'pp-qr printing');
+  const qr = el('div', reducedMotion ? 'pp-qr' : 'pp-qr printing');
   const svg = qrElement(qrSvgText);
   qr.style.setProperty('--rows', svg.querySelectorAll ? svg.querySelectorAll('.qr-row').length : 0);
   qr.append(svg, el('div', 'pp-qr-scan'));

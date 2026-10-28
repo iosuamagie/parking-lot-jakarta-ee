@@ -24,4 +24,13 @@ class CsrfFilterTest {
         assertFalse(CsrfFilter.matches(null, "abc123"));
         assertFalse(CsrfFilter.matches(null, null));
     }
+
+    @Test
+    void onlyTheJaxRsServletCountsAsTheApi() {
+        // The servlet path is decoded and normalized, so "/api/..;/Users" cannot pass for the API
+        assertTrue(CsrfFilter.isApi("/api"));
+        assertFalse(CsrfFilter.isApi("/Users"));
+        assertFalse(CsrfFilter.isApi("/api-docs"));
+        assertFalse(CsrfFilter.isApi(""));
+    }
 }

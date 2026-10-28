@@ -58,6 +58,20 @@ public class LiveHub {
         }
     }
 
+    /**
+     * A comment line that pages ignore. A closed page is only noticed when a write to it fails, so this
+     * frees its place even when no car moves (and keeps proxies from closing a quiet connection).
+     */
+    public synchronized void heartbeat() {
+        if (subscribers.isEmpty()) {
+            return;
+        }
+        OutboundSseEvent ping = sse.newEventBuilder().comment("ping").build();
+        for (SseEventSink sink : subscribers) {
+            send(sink, ping);
+        }
+    }
+
     private OutboundSseEvent event(String name, Object payload) {
         return sse.newEventBuilder()
                 .name(name)

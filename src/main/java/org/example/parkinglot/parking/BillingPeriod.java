@@ -10,6 +10,9 @@ import java.time.temporal.ChronoUnit;
 public record BillingPeriod(LocalDate from, LocalDate to) {
     public static final int DEFAULT_DAYS = 7;
     public static final int MAX_DAYS = 366;
+    /** Years the lot can have data for; outside them the date math and the database fail. */
+    private static final int FIRST_YEAR = 2000;
+    private static final int LAST_YEAR = 2100;
 
     /** @throws IllegalArgumentException with a message for people, when the dates are not a usable period */
     public static BillingPeriod parse(String from, String to, LocalDate today) {
@@ -33,11 +36,16 @@ public record BillingPeriod(LocalDate from, LocalDate to) {
     }
 
     private static LocalDate date(String value) {
+        LocalDate date;
         try {
-            return LocalDate.parse(value.trim());
+            date = LocalDate.parse(value.trim());
         } catch (DateTimeParseException ex) {
             throw new IllegalArgumentException("Data trebuie scrisă ca AAAA-LL-ZZ, de exemplu 2026-10-27.", ex);
         }
+        if (date.getYear() < FIRST_YEAR || date.getYear() > LAST_YEAR) {
+            throw new IllegalArgumentException("Alege o dată între anii " + FIRST_YEAR + " și " + LAST_YEAR + ".");
+        }
+        return date;
     }
 
     public long days() {

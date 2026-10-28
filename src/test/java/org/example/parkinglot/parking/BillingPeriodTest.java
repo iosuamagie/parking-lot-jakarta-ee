@@ -31,5 +31,10 @@ class BillingPeriodTest {
         assertThrows(IllegalArgumentException.class, () -> BillingPeriod.parse("2026-10-27", "2026-10-01", TODAY));
         assertThrows(IllegalArgumentException.class, () -> BillingPeriod.parse("2024-01-01", "2026-10-27", TODAY));
         assertThrows(IllegalArgumentException.class, () -> BillingPeriod.parse("2026-10-01", null, TODAY));
+        // Signed years parse as dates but break the date math and the database
+        assertThrows(IllegalArgumentException.class,
+                () -> BillingPeriod.parse("+999999999-12-31", "+999999999-12-31", TODAY));
+        assertThrows(IllegalArgumentException.class, () -> BillingPeriod.parse("+100000-01-01", "+100000-01-01", TODAY));
+        assertThrows(IllegalArgumentException.class, () -> BillingPeriod.parse("1999-12-31", "1999-12-31", TODAY));
     }
 }

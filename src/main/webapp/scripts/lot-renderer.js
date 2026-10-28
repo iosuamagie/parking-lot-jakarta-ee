@@ -269,8 +269,9 @@ export function createLot(canvas, { reducedMotion = false } = {}) {
     },
 
     carEntered(car) {
+      // A car still driving into this spot is a stale event: put it down. A car still leaving the spot is
+      // another car and keeps driving out (dropping it here would leave it stuck in the exit queue).
       finishEntryOn(car.spot);
-      movers = movers.filter(m => m.car.spot !== car.spot);
       if (reducedMotion) {
         parked.set(car.spot, toCar(car));
         return;

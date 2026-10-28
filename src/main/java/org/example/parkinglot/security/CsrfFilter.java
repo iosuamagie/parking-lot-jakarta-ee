@@ -32,7 +32,7 @@ public class CsrfFilter extends HttpFilter {
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         // The JSON API has no forms and must not give every visitor of the live page a session
-        if (isApi(request)) {
+        if (isApi(request.getServletPath())) {
             chain.doFilter(request, response);
             return;
         }
@@ -61,10 +61,12 @@ public class CsrfFilter extends HttpFilter {
         chain.doFilter(request, response);
     }
 
-    /** JAX-RS is mapped to /api/*, so its servlet path is only "/api"; the full path tells the routes apart. */
-    static boolean isApi(HttpServletRequest request) {
-        String path = request.getRequestURI().substring(request.getContextPath().length());
-        return path.startsWith("/api/");
+    /**
+     * JAX-RS is mapped to /api/*, so its servlet path is exactly "/api". The servlet path is decoded and
+     * normalized by the container, unlike the raw request URI, so tricks like "/api/..;/Users" do not pass.
+     */
+    static boolean isApi(String servletPath) {
+        return "/api".equals(servletPath);
     }
 
     /**

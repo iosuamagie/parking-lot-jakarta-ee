@@ -409,6 +409,8 @@ footer a { color: var(--pp-muted); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
+    /* Without this, staggered delays still reveal the QR rows and the chart bars one by one */
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }

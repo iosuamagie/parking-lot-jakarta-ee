@@ -128,14 +128,30 @@ function setLive(isLive) {
   badge.lastChild.textContent = isLive ? 'LIVE' : 'Reconectare…';
 }
 
+const RETRY_MIN_MS = 5000;
+const RETRY_MAX_MS = 30000;
+let retryMs = RETRY_MIN_MS;
+
 function connect() {
   const events = new EventSource(`${ctx}/api/events`);
-  events.addEventListener('snapshot', e => { applySnapshot(JSON.parse(e.data)); setLive(true); });
+  events.addEventListener('snapshot', e => {
+    applySnapshot(JSON.parse(e.data));
+    setLive(true);
+    retryMs = RETRY_MIN_MS;
+  });
   events.addEventListener('entered', e => onEntered(JSON.parse(e.data)));
   events.addEventListener('exited', e => onExited(JSON.parse(e.data)));
   events.addEventListener('stats', e => renderStats(JSON.parse(e.data)));
-  // The browser reconnects by itself and the server starts again with a snapshot
-  events.onerror = () => setLive(false);
+  events.onerror = () => {
+    setLive(false);
+    // After a dropped connection the browser reconnects by itself (and the server starts again with a
+    // snapshot). After an error answer, like 503 when too many pages are open, it gives up: try again later.
+    if (events.readyState === EventSource.CLOSED) {
+      events.close();
+      setTimeout(connect, retryMs);
+      retryMs = Math.min(retryMs * 2, RETRY_MAX_MS);
+    }
+  };
 }
 
 async function refresh() {
