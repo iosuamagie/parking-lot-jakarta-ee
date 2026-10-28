@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -49,6 +50,30 @@ class ParkPulseIT {
     void theApiNeedsALogin() {
         HttpResponse<String> response = new Browser(ParkPulseServer.baseUrl()).get("/api/cars");
         assertFalse(response.body().contains("licensePlate"));
+    }
+
+    @Test
+    void signingInFromTheLoginButtonLandsOnAStaffPage() {
+        // Like a visitor: open the login page first, not a protected page
+        Browser browser = new Browser(ParkPulseServer.baseUrl());
+        HttpResponse<String> loginPage = browser.get("/Login");
+        assertEquals(302, loginPage.statusCode());
+        assertTrue(loginPage.headers().firstValue("Location").orElse("").endsWith("/Account"));
+        assertTrue(browser.get("/Account").body().contains("Sign in"));
+
+        // A wrong password first: the error page must still lead to a working login
+        HttpResponse<String> wrong = browser.post("/j_security_check",
+                Map.of("j_username", "billing", "j_password", "wrong-password"), false);
+        String errorPage = URI.create(wrong.headers().firstValue("Location").orElseThrow()).getRawPath() + "?error=true";
+        assertTrue(browser.get(errorPage).body().contains("Username or password incorrect"));
+
+        HttpResponse<String> signIn = browser.post("/j_security_check",
+                Map.of("j_username", "billing", "j_password", ParkPulseServer.DEMO_PASSWORD), false);
+        assertEquals(302, signIn.statusCode());
+        HttpResponse<String> account = browser.get(URI.create(signIn.headers().firstValue("Location").orElseThrow()).getRawPath());
+        assertEquals(302, account.statusCode());
+        assertTrue(account.headers().firstValue("Location").orElse("").endsWith("/billing"));
+        assertEquals(200, browser.get("/billing").statusCode());
     }
 
     @Test
@@ -238,8 +263,9 @@ class ParkPulseIT {
     // --- Tickets ---
 
     private static String aParkedTicketCode(Browser browser) {
-        Matcher matcher = PARKED_TICKET_CODE.matcher(browser.get("/api/lot").body());
-        assertTrue(matcher.find(), "No car is parked");
+        String lot = browser.get("/api/lot").body();
+        Matcher matcher = PARKED_TICKET_CODE.matcher(lot);
+        assertTrue(matcher.find(), "No car is parked: " + lot);
         return matcher.group(1);
     }
 

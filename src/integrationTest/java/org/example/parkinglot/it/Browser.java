@@ -161,10 +161,14 @@ final class Browser {
     }
 
     String csrfToken() {
-        // Any page with a form shows the token; the logout button is on every page for logged in users
-        Matcher matcher = CSRF_TOKEN.matcher(get("/Login").body());
+        // Logged in users have the logout form (with the token) in the menu of every page;
+        // other visitors find it in the login form, which a protected page shows
+        Matcher matcher = CSRF_TOKEN.matcher(get("/").body());
         if (!matcher.find()) {
-            throw new IllegalStateException("No CSRF token on the page");
+            matcher = CSRF_TOKEN.matcher(get("/Account").body());
+            if (!matcher.find()) {
+                throw new IllegalStateException("No CSRF token on the page");
+            }
         }
         return matcher.group(1);
     }

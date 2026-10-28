@@ -28,7 +28,7 @@
             <li>
                 <c:choose>
                     <c:when test="${pageContext.request.remoteUser == null}">
-                        <a class="pp-pill pp-pill-primary" href="${ctx}/Login">
+                        <a class="pp-pill pp-pill-primary" href="${ctx}/Account">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
                             Autentificare
                         </a>
