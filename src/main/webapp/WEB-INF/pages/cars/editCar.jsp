@@ -4,54 +4,58 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <t:pageTemplate pageTitle="Edit Car">
-    <c:if test="${not empty errorMessage}">
-        <div class="alert alert-danger" role="alert">
-            <c:out value="${errorMessage}"/>
-        </div>
-    </c:if>
-
-    <h1>Edit Car</h1>
-
-    <form class="needs-validation" novalidate method="POST" action="${pageContext.request.contextPath}/EditCar">
-        <t:csrf/>
-        <div class="row g-3">
-            <div class="col-md-6 mb-3">
-                <label for="license_plate" class="form-label">License Plate</label>
-                <input type="text" class="form-control" id="license_plate" name="license_plate"
-                       value="${fn:escapeXml(car.licensePlate)}" minlength="3" maxlength="100" required>
-                <div class="invalid-feedback">
-                    License Plate is required.
+    <div class="pp-page">
+        <section class="pp-card pp-form">
+            <c:if test="${not empty errorMessage}">
+                <div class="alert alert-danger" role="alert">
+                    <c:out value="${errorMessage}"/>
                 </div>
-            </div>
+            </c:if>
 
-            <div class="col-md-6 mb-3">
-                <label for="parking_spot" class="form-label">Parking Spot</label>
-                <input type="text" class="form-control" id="parking_spot" name="parking_spot"
-                       value="${fn:escapeXml(car.parkingSpot)}" minlength="3" maxlength="100" required>
-                <div class="invalid-feedback">
-                    Parking Spot is required.
+            <h1 class="pp-page-title">Edit Car</h1>
+
+            <form class="needs-validation" novalidate method="POST" action="${pageContext.request.contextPath}/EditCar">
+                <t:csrf/>
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label for="license_plate" class="form-label">License Plate</label>
+                        <input type="text" class="form-control" id="license_plate" name="license_plate"
+                               value="${fn:escapeXml(car.licensePlate)}" minlength="3" maxlength="100" required>
+                        <div class="invalid-feedback">
+                            License Plate is required.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="parking_spot" class="form-label">Parking Spot</label>
+                        <input type="text" class="form-control" id="parking_spot" name="parking_spot"
+                               value="${fn:escapeXml(car.parkingSpot)}" minlength="3" maxlength="100" required>
+                        <div class="invalid-feedback">
+                            Parking Spot is required.
+                        </div>
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label for="owner_id" class="form-label">Owner</label>
+                        <select class="form-select" id="owner_id" name="owner_id" required>
+                            <option value="">Choose...</option>
+                            <c:forEach var="user" items="${users}">
+                                <option value="${user.id}" ${car.ownerName eq user.username ? 'selected' : ''}>
+                                    <c:out value="${user.username}"/>
+                                </option>
+                            </c:forEach>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select an owner.
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="col-12 mb-3">
-                <label for="owner_id" class="form-label">Owner</label>
-                <select class="form-select" id="owner_id" name="owner_id" required>
-                    <option value="">Choose...</option>
-                    <c:forEach var="user" items="${users}">
-                        <option value="${user.id}" ${car.ownerName eq user.username ? 'selected' : ''}>
-                            <c:out value="${user.username}"/>
-                        </option>
-                    </c:forEach>
-                </select>
-                <div class="invalid-feedback">
-                    Please select an owner.
-                </div>
-            </div>
-        </div>
+                <hr class="mb-4">
+                <input type="hidden" name="car_id" value="${car.id}"/>
+                <button class="w-100 btn btn-primary btn-lg" type="submit">Save Changes</button>
+            </form>
 
-        <hr class="mb-4">
-        <input type="hidden" name="car_id" value="${car.id}"/>
-        <button class="w-100 btn btn-primary btn-lg" type="submit">Save Changes</button>
-    </form>
-
+        </section>
+    </div>
 </t:pageTemplate>
