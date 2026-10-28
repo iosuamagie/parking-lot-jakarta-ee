@@ -15,7 +15,9 @@
   <img src="https://img.shields.io/badge/PostgreSQL-17-14b8a6" alt="PostgreSQL 17">
 </p>
 
-<!-- Screenshots and the short video go here: docs/images/live.png, ticket.png, billing.png, api-docs.png -->
+<p align="center">
+  <img src="docs/images/live.gif" alt="Pixel-art cars driving through the barrier into their spots and backing out again" width="806">
+</p>
 
 ## Why it exists
 
@@ -38,6 +40,17 @@ ParkPulse started as a lab project for a Jakarta EE course at Lucian Blaga Unive
 - **Billing** (`/billing`, role `INVOICING`): money per period with a bar for each day, the paid tickets with search and pages, and a PDF report for any period of up to 366 days.
 - **API docs** (`/api-docs`, public): Swagger UI on the OpenAPI document that Payara builds from the annotations (`/openapi`).
 - **Subscriptions and users** (staff, `/Cars` and `/Users`): cars with a reserved spot, an owner and a photo, kept apart from the simulated cars on the map, and the users with their roles.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/live.png" alt="The live page: day cards, the parking map and the activity list"><br><sub><b>The live page</b>: day cards, the map and the latest entries and exits</sub></td>
+    <td width="50%"><img src="docs/images/ticket.png" alt="An open parking ticket with its plate, amount due and QR code"><br><sub><b>A ticket</b>: the amount due grows while the car is parked</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/images/billing.png" alt="The billing page with money per day and the paid tickets"><br><sub><b>Billing</b>: money per day, paid tickets and a PDF report</sub></td>
+    <td width="50%"><img src="docs/images/api-docs.png" alt="Swagger UI listing the ParkPulse API"><br><sub><b>API docs</b>: Swagger UI on the OpenAPI document</sub></td>
+  </tr>
+</table>
 
 The parking lot has its own clock that runs 60 times faster than real time, so a few minutes on the page show the stays and prices of a few hours. The tariff is 15 free minutes, then 6 lei per hour, charged for every started minute.
 
