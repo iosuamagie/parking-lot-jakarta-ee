@@ -1,8 +1,35 @@
-# ParkPulse (Jakarta EE)
+<p align="center">
+  <img src="docs/images/logo.svg" alt="ParkPulse" width="440">
+</p>
 
-[![CI](https://github.com/iosuamagie/parkpulse/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/iosuamagie/parkpulse/actions/workflows/ci.yml)
+<p align="center">
+  <b>A public parking lot you can watch live, built with plain Jakarta EE.</b><br>
+  Pixel-art cars drive in and out in real time, every car gets a ticket with a QR code, and the money ends up in a billing report.
+</p>
 
-A public parking lot you can watch live. Simulated cars drive in and out every few seconds, drawn in pixel art on the home page, and every car gets a ticket with a QR code and a PDF receipt when it leaves. Behind it there is a staff side for cars, users and billing. It started as a lab project for a course at Lucian Blaga University of Sibiu (ULBS) and grew one step at a time, staying plain Jakarta EE: no frontend framework and no JavaScript build step.
+<p align="center">
+  <a href="https://github.com/iosuamagie/parkpulse/actions/workflows/ci.yml"><img src="https://github.com/iosuamagie/parkpulse/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
+  <img src="https://img.shields.io/badge/Java-21-4f46e5" alt="Java 21">
+  <img src="https://img.shields.io/badge/Jakarta%20EE-10-4f46e5" alt="Jakarta EE 10">
+  <img src="https://img.shields.io/badge/Payara-7-14b8a6" alt="Payara 7">
+  <img src="https://img.shields.io/badge/PostgreSQL-17-14b8a6" alt="PostgreSQL 17">
+</p>
+
+<!-- Screenshots and the short video go here: docs/images/live.png, ticket.png, billing.png, api-docs.png -->
+
+## Why it exists
+
+ParkPulse started as a lab project for a Jakarta EE course at Lucian Blaga University of Sibiu (ULBS): a CRUD app for cars and users. I kept growing it one step at a time into something you can open and watch, while staying on the course's stack: EJB, JPA, JAX-RS and JSP, with no frontend framework and no JavaScript build step. The map is a 2D canvas driven by plain ES modules, and everything else is rendered on the server.
+
+**Highlights**
+
+- An **EJB timer** runs a traffic simulator on an **accelerated parking clock** (60× real time), so a few minutes on the page show hours of parking and real prices.
+- Changes reach every open page over **server-sent events** (JAX-RS SSE), with a heartbeat and automatic reconnect.
+- Cars are **drawn in code** as pixel sprites: five shapes, many colours, full routes through the barriers, backing out of the spot, a queue at the gate.
+- **Tickets** have unguessable codes, a server-side **QR code** (ZXing, as SVG) and an **80 mm PDF receipt** (OpenPDF, with Romanian letters).
+- A **billing page** and an A4 **PDF report**, behind role-based security (Jakarta Security, PBKDF2 hashes, CSRF tokens).
+- The API is described with **MicroProfile OpenAPI** and browsable in **Swagger UI**.
+- **Integration tests** start the real app in Docker with Testcontainers and use it like a browser and an API client; GitHub Actions runs them on every push.
 
 ## What you see
 
@@ -15,6 +42,34 @@ A public parking lot you can watch live. Simulated cars drive in and out every f
 The parking lot has its own clock that runs 60 times faster than real time, so a few minutes on the page show the stays and prices of a few hours. The tariff is 15 free minutes, then 6 lei per hour, charged for every started minute.
 
 Ticket codes are 22 random characters, so nobody can guess another person's ticket. Because the cars are simulated, the live map shares their codes with everyone; a real lot would only print them on the paper ticket.
+
+## How it works
+
+```mermaid
+flowchart LR
+    subgraph Payara["Payara Server 7"]
+        Clock["ParkingClockBean<br/>parking time, 60x"]
+        Sim["SimulatorBean<br/>@Schedule, every second"]
+        Sessions["ParkingSessionBean<br/>enter / exit / stats"]
+        Hub["LiveHub<br/>server-sent events"]
+        Rest["JAX-RS /api<br/>lot, tickets, billing, cars"]
+        Docs["QR (ZXing)<br/>PDF (OpenPDF)"]
+        Pages["Servlets + JSP<br/>billing, tickets, staff pages"]
+    end
+    DB[("PostgreSQL<br/>parking_session")]
+    Browser["Browser<br/>canvas map + ES modules"]
+
+    Sim --> Clock
+    Sim --> Sessions --> DB
+    Sim -- "entered / exited / stats" --> Hub
+    Hub -- "/api/events" --> Browser
+    Browser -- "/api/lot, /api/tickets" --> Rest
+    Rest --> Sessions
+    Rest --> Docs
+    Pages --> Sessions
+```
+
+Each simulator step commits its own transaction before the event goes out, so a page that receives an event can always load the matching ticket. When a tab comes back from the background, the page redraws the lot from a fresh snapshot instead of replaying the moves it missed.
 
 ## Run it in one command
 
