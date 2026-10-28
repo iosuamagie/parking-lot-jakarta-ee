@@ -5,11 +5,7 @@
 <t:pageTemplate pageTitle="Sign in · ParkPulse">
     <div class="pp-login">
         <section class="pp-card pp-login-card">
-            <svg class="pp-login-logo" width="44" height="44" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
-                <rect width="8" height="8" fill="#4f46e5"/>
-                <rect x="2" y="1" width="3" height="1" fill="#fff"/><rect x="2" y="2" width="1" height="5" fill="#fff"/>
-                <rect x="5" y="2" width="1" height="2" fill="#fff"/><rect x="3" y="4" width="2" height="1" fill="#fff"/>
-            </svg>
+            <div class="pp-login-logo"><t:logo/></div>
 
             <c:if test="${message != null}">
                 <div class="alert alert-warning" role="alert">

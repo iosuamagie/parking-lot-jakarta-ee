@@ -5,13 +5,8 @@
 <%-- Pages shown by a servlet are forwards, so the address the visitor asked for is in this attribute --%>
 <c:set var="path" value="${empty requestScope['jakarta.servlet.forward.request_uri'] ? pageContext.request.requestURI : requestScope['jakarta.servlet.forward.request_uri']}"/>
 <header class="pp-top">
-    <a class="pp-brand" href="${ctx}/">
-        <svg width="26" height="26" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
-            <rect width="8" height="8" fill="#4f46e5"/>
-            <rect x="2" y="1" width="3" height="1" fill="#fff"/><rect x="2" y="2" width="1" height="5" fill="#fff"/>
-            <rect x="5" y="2" width="1" height="2" fill="#fff"/><rect x="3" y="4" width="2" height="1" fill="#fff"/>
-        </svg>
-        ParkPulse
+    <a class="pp-brand" href="${ctx}/" aria-label="ParkPulse, pagina principală">
+        <t:logo/>
     </a>
     <nav aria-label="Meniu">
         <ul class="pp-nav">

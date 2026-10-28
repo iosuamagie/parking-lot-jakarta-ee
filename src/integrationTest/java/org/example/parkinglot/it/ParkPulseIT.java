@@ -260,6 +260,8 @@ class ParkPulseIT {
         assertTrue(body.contains("Autentificare"));
         // Visitors who turned animations off in their system can still switch them on here
         assertTrue(body.contains("id=\"motion-toggle\""));
+        // The logo is the name with a heartbeat line through it
+        assertTrue(body.contains("class=\"pp-pulse\""));
     }
 
     // --- Tickets ---

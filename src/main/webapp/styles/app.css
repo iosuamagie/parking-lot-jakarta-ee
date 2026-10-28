@@ -52,6 +52,30 @@ main { flex: 1; }
   text-decoration: none;
 }
 .pp-brand:hover { color: var(--pp-ink); }
+
+/* The logo: the name with a heartbeat line through it and a bright beat running along the line */
+.pp-logo { position: relative; display: inline-block; padding: 0 6px; }
+.pp-logo-text { position: relative; z-index: 1; }
+.pp-pulse {
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  width: calc(100% + 26px);
+  height: 34px;
+  transform: translateY(-46%);
+  overflow: visible;
+  pointer-events: none;
+}
+.pp-pulse path { fill: none; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.pp-pulse-line { stroke: rgba(79, 70, 229, .28); stroke-width: 1.6; }
+.pp-pulse-beat {
+  stroke: #4f46e5;
+  stroke-width: 2.4;
+  stroke-dasharray: 24 100;
+  stroke-dashoffset: 24;
+  filter: drop-shadow(0 0 2px rgba(99, 102, 241, .9)) drop-shadow(0 0 6px rgba(20, 184, 166, .55));
+  animation: pp-heartbeat 2.6s cubic-bezier(.45, 0, .55, 1) infinite;
+}
 .pp-nav {
   display: flex;
   align-items: center;
@@ -358,7 +382,7 @@ main { flex: 1; }
 .pp-page-note { margin: -8px 0 16px; font-size: 13px; }
 .pp-login { display: flex; justify-content: center; padding: 24px 12px; }
 .pp-login-card { width: 100%; max-width: 380px; }
-.pp-login-logo { display: block; margin-bottom: 16px; }
+.pp-login-logo { margin-bottom: 18px; font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
 
 /* Bootstrap parts the older pages use, in the ParkPulse look */
 .btn { border-radius: 999px; padding: .5rem 1.1rem; font-weight: 600; }
@@ -391,6 +415,12 @@ footer a { color: var(--pp-muted); }
   0% { opacity: 0; transform: translateX(18px); background: var(--pp-indigo-soft); }
   20% { opacity: 1; transform: none; background: var(--pp-indigo-soft); }
   100% { background: transparent; }
+}
+@keyframes pp-heartbeat {
+  0% { stroke-dashoffset: 24; stroke: #6366f1; }
+  55% { stroke: #4f46e5; }
+  75% { stroke-dashoffset: -100; stroke: #14b8a6; }
+  100% { stroke-dashoffset: -100; stroke: #14b8a6; }
 }
 @keyframes pp-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @keyframes pp-qr-in { from { opacity: 0; } to { opacity: 1; } }
