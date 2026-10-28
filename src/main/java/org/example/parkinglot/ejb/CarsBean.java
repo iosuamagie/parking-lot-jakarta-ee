@@ -82,7 +82,7 @@ public class CarsBean {
         List<CarDto> dtoList = new ArrayList<>();
 
         for (Car car : cars) {
-            // Verificare pentru a evita NullPointerException dacă nu există owner
+            // A car may have no owner
             String ownerName = (car.getOwner() != null) ? car.getOwner().getUsername() : "No Owner";
 
             CarDto dto = new CarDto(
@@ -104,14 +104,14 @@ public class CarsBean {
     }
 
     public CarDto findById(Long id) {
-        // Căutăm entitatea în baza de date
+        // Find the entity in the database
         Car car = entityManager.find(Car.class, id);
 
         if (car == null) {
             return null;
         }
 
-        // Convertim Entitatea în DTO (pentru a o trimite la JSP)
+        // Turn the entity into a DTO for the JSP
         String ownerName = (car.getOwner() != null) ? car.getOwner().getUsername() : "";
         return new CarDto(car.getId(), car.getLicensePlate(), car.getParkingSpot(), ownerName);
     }

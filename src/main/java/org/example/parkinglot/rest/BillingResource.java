@@ -26,7 +26,7 @@ import org.example.parkinglot.servlets.Params;
  * Dates are written as 2026-10-27; without dates the period is the last 7 days.
  */
 @Path("/billing")
-@Tag(name = "Încasări")
+@Tag(name = "Billing")
 public class BillingResource {
 
     @Inject
@@ -38,15 +38,15 @@ public class BillingResource {
     @GET
     @Path("/tickets")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Biletele plătite", description = "Câte 20 pe pagină, cele mai noi primele. "
-            + "Fără date: ultimele 7 zile.")
-    @APIResponse(responseCode = "200", description = "O pagină de bilete")
-    @APIResponse(responseCode = "400", description = "Datele nu formează o perioadă de cel mult 366 de zile")
+    @Operation(summary = "Paid tickets", description = "20 per page, newest first. "
+            + "Without dates: the last 7 days.")
+    @APIResponse(responseCode = "200", description = "A page of tickets")
+    @APIResponse(responseCode = "400", description = "The dates are not a period of at most 366 days")
     public PageDto<PaidTicketDto> tickets(
-            @Parameter(description = "Prima zi, AAAA-LL-ZZ", example = "2026-10-21") @QueryParam("from") String from,
-            @Parameter(description = "Ultima zi, AAAA-LL-ZZ", example = "2026-10-27") @QueryParam("to") String to,
-            @Parameter(description = "Caută în numărul mașinii", example = "SB") @QueryParam("plate") String plate,
-            @Parameter(description = "Pagina, de la 1", example = "1") @QueryParam("page") String page) {
+            @Parameter(description = "First day, YYYY-MM-DD", example = "2026-10-21") @QueryParam("from") String from,
+            @Parameter(description = "Last day, YYYY-MM-DD", example = "2026-10-27") @QueryParam("to") String to,
+            @Parameter(description = "Part of the plate number", example = "SB") @QueryParam("plate") String plate,
+            @Parameter(description = "The page, from 1", example = "1") @QueryParam("page") String page) {
         BillingPeriod period = period(from, to);
         Long pageNumber = Params.parseId(page);
         return billingBean.paidTickets(period.from(), period.to(), plate,
@@ -56,12 +56,12 @@ public class BillingResource {
     @GET
     @Path("/report.pdf")
     @Produces("application/pdf")
-    @Operation(summary = "Raportul PDF pe perioadă")
-    @APIResponse(responseCode = "200", description = "Raportul, pe pagini A4")
-    @APIResponse(responseCode = "400", description = "Datele nu formează o perioadă de cel mult 366 de zile")
+    @Operation(summary = "PDF report for a period")
+    @APIResponse(responseCode = "200", description = "The report, on A4 pages")
+    @APIResponse(responseCode = "400", description = "The dates are not a period of at most 366 days")
     public Response report(
-            @Parameter(description = "Prima zi, AAAA-LL-ZZ", example = "2026-10-21") @QueryParam("from") String from,
-            @Parameter(description = "Ultima zi, AAAA-LL-ZZ", example = "2026-10-27") @QueryParam("to") String to) {
+            @Parameter(description = "First day, YYYY-MM-DD", example = "2026-10-21") @QueryParam("from") String from,
+            @Parameter(description = "Last day, YYYY-MM-DD", example = "2026-10-27") @QueryParam("to") String to) {
         BillingPeriod period = period(from, to);
         byte[] pdf = ReportPdf.render(billingBean.summary(period.from(), period.to()),
                 billingBean.allPaidTickets(period.from(), period.to()));

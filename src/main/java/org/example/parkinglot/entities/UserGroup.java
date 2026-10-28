@@ -14,11 +14,11 @@ public class UserGroup {
 
     private String userGroup;
 
-    // Constructor gol obligatoriu pentru JPA
+    // JPA needs an empty constructor
     public UserGroup() {
     }
 
-    // Constructor cu parametri (util mai tarziu)
+    // Constructor with all fields
     public UserGroup(String username, String userGroup) {
         this.username = username;
         this.userGroup = userGroup;

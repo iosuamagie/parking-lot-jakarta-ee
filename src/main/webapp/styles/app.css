@@ -186,7 +186,7 @@ main { flex: 1; }
 .pp-plate-text { font-family: Consolas, "Cascadia Mono", monospace; font-weight: 700; }
 .pp-act-time { color: var(--pp-soft); font-size: 12px; }
 
-/* --- Ticket (popup and /bilet page) --- */
+/* --- Ticket (popup and /ticket page) --- */
 .pp-ticket {
   position: relative;
   width: 300px;

@@ -5,27 +5,27 @@
 <%-- Pages shown by a servlet are forwards, so the address the visitor asked for is in this attribute --%>
 <c:set var="path" value="${empty requestScope['jakarta.servlet.forward.request_uri'] ? pageContext.request.requestURI : requestScope['jakarta.servlet.forward.request_uri']}"/>
 <header class="pp-top">
-    <a class="pp-brand" href="${ctx}/" aria-label="ParkPulse, pagina principală">
+    <a class="pp-brand" href="${ctx}/" aria-label="ParkPulse, home">
         <t:logo/>
     </a>
-    <nav aria-label="Meniu">
+    <nav aria-label="Menu">
         <ul class="pp-nav">
             <li><a class="pp-pill ${path eq ctx.concat('/') or path.endsWith('/index.jsp') ? 'active' : ''}" href="${ctx}/">Live</a></li>
             <c:if test="${pageContext.request.isUserInRole('READ_CARS')}">
-                <li><a class="pp-pill ${path.endsWith('/Cars') ? 'active' : ''}" href="${ctx}/Cars">Abonamente</a></li>
+                <li><a class="pp-pill ${path.endsWith('/Cars') ? 'active' : ''}" href="${ctx}/Cars">Subscriptions</a></li>
             </c:if>
             <c:if test="${pageContext.request.isUserInRole('READ_USERS')}">
-                <li><a class="pp-pill ${path.endsWith('/Users') ? 'active' : ''}" href="${ctx}/Users">Useri</a></li>
+                <li><a class="pp-pill ${path.endsWith('/Users') ? 'active' : ''}" href="${ctx}/Users">Users</a></li>
             </c:if>
             <c:if test="${pageContext.request.isUserInRole('INVOICING')}">
-                <li><a class="pp-pill ${path.endsWith('/billing') ? 'active' : ''}" href="${ctx}/billing">Încasări</a></li>
+                <li><a class="pp-pill ${path.endsWith('/billing') ? 'active' : ''}" href="${ctx}/billing">Billing</a></li>
             </c:if>
             <li>
                 <c:choose>
                     <c:when test="${pageContext.request.remoteUser == null}">
                         <a class="pp-pill pp-pill-primary" href="${ctx}/Account">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-                            Autentificare
+                            Sign in
                         </a>
                     </c:when>
                     <c:otherwise>

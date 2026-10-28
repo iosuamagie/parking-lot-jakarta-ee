@@ -28,6 +28,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -38,8 +39,8 @@ import java.util.Map;
 @WebServlet(name = "Billing", value = "/billing")
 public class Billing extends HttpServlet {
     private static final List<String> PERIODS = List.of("today", "7d", "month", "custom");
-    private static final String[] WEEKDAYS = {"Lu", "Ma", "Mi", "Jo", "Vi", "Sâ", "Du"};
-    private static final DateTimeFormatter DAY_MONTH = DateTimeFormatter.ofPattern("dd.MM");
+    private static final String[] WEEKDAYS = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+    private static final DateTimeFormatter DAY_MONTH = DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH);
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
 
     @Inject
@@ -104,7 +105,7 @@ public class Billing extends HttpServlet {
         int previous = summary.previousPeriodTotalBani();
         if (previous > 0) {
             long change = Math.round(100.0 * (summary.totalBani() - previous) / previous);
-            kpi.put("trend", (change >= 0 ? "▲ " : "▼ ") + Math.abs(change) + "% față de perioada anterioară");
+            kpi.put("trend", (change >= 0 ? "▲ " : "▼ ") + Math.abs(change) + "% vs the previous period");
             kpi.put("trendUp", change >= 0);
         }
         return kpi;
@@ -120,7 +121,7 @@ public class Billing extends HttpServlet {
             bar.put("label", isToday ? "Azi" : label);
             bar.put("height", max == 0 ? 0 : Math.max(2, Math.round(100f * day.totalBani() / max)));
             bar.put("today", isToday);
-            bar.put("title", DAY_MONTH.format(day.day()) + ": " + Tariff.format(day.totalBani()) + ", " + day.tickets() + " bilete");
+            bar.put("title", DAY_MONTH.format(day.day()) + ": " + Tariff.format(day.totalBani()) + ", " + day.tickets() + " tickets");
             return bar;
         }).toList();
     }
@@ -137,7 +138,7 @@ public class Billing extends HttpServlet {
         row.put("times", DAY_MONTH.format(in) + " " + TIME.format(in) + " → "
                 + (in.toLocalDate().equals(out.toLocalDate()) ? "" : DAY_MONTH.format(out) + " ") + TIME.format(out));
         row.put("duration", minutes < 60 ? minutes + "m" : (minutes / 60) + "h " + (minutes % 60) + "m");
-        row.put("amount", ticket.amountBani() == 0 ? "gratuit" : Tariff.format(ticket.amountBani()));
+        row.put("amount", ticket.amountBani() == 0 ? "free" : Tariff.format(ticket.amountBani()));
         row.put("free", ticket.amountBani() == 0);
         return row;
     }

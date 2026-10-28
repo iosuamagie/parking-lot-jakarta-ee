@@ -9,7 +9,7 @@ import java.io.UncheckedIOException;
 
 /**
  * Liberation Sans from openpdf-fonts-extra, embedded in the PDF with Unicode (Identity-H) encoding.
- * The standard PDF fonts have no ă, ș or ț, so Romanian text needs a real font.
+ * The standard PDF fonts only cover Latin-1, so a real font keeps any name or symbol readable.
  */
 public final class PdfFonts {
     private static final BaseFont REGULAR = load("LiberationSans-Regular.ttf");

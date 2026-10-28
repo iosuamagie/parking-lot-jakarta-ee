@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /** A till-style receipt, 80 mm wide and as tall as its content. */
 public final class ReceiptPdf {
@@ -24,7 +25,7 @@ public final class ReceiptPdf {
     static final float WIDTH = 226.77f;
     private static final float MARGIN = 14f;
     private static final DateTimeFormatter DATE_TIME =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(AcceleratedClock.ZONE);
+            DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.ENGLISH).withZone(AcceleratedClock.ZONE);
     private static final Color MUTED = new Color(0x6b, 0x72, 0x80);
 
     private ReceiptPdf() {
@@ -42,7 +43,7 @@ public final class ReceiptPdf {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(new Rectangle(WIDTH, height), MARGIN, MARGIN, MARGIN, MARGIN);
         PdfWriter.getInstance(document, out);
-        document.addTitle("Chitanță " + ticket.ticketNumber());
+        document.addTitle("Receipt " + ticket.ticketNumber());
         document.open();
         document.add(content);
         document.close();
@@ -51,16 +52,16 @@ public final class ReceiptPdf {
 
     private static PdfPTable content(TicketDto ticket) {
         PdfPTable table = new PdfPTable(new float[]{1f, 1.5f});
-        centered(table, "ParkPulse · Chitanță", PdfFonts.bold(13), 2);
-        centered(table, "Parcare publică", PdfFonts.regular(8), 10);
-        line(table, "Bilet", ticket.ticketNumber());
-        line(table, "Număr", ticket.plate());
-        line(table, "Loc", ticket.spot());
-        line(table, "Intrare", DATE_TIME.format(ticket.enteredAt()));
-        line(table, "Ieșire", DATE_TIME.format(ticket.exitedAt()));
-        line(table, "Durată", duration(ticket.enteredAt(), ticket.exitedAt()));
+        centered(table, "ParkPulse · Receipt", PdfFonts.bold(13), 2);
+        centered(table, "Public parking", PdfFonts.regular(8), 10);
+        line(table, "Ticket", ticket.ticketNumber());
+        line(table, "Plate", ticket.plate());
+        line(table, "Spot", ticket.spot());
+        line(table, "Entered", DATE_TIME.format(ticket.enteredAt()));
+        line(table, "Left", DATE_TIME.format(ticket.exitedAt()));
+        line(table, "Stay", duration(ticket.enteredAt(), ticket.exitedAt()));
 
-        PdfPCell tariff = cell(new Phrase("Tarif: primele 15 minute gratuit, apoi 6 lei/oră, pe fiecare minut început.",
+        PdfPCell tariff = cell(new Phrase("Tariff: the first 15 minutes are free, then 6 RON/hour for every started minute.",
                 font(PdfFonts.regular(7.5f), MUTED)));
         tariff.setColspan(2);
         tariff.setPaddingTop(6);
@@ -78,8 +79,8 @@ public final class ReceiptPdf {
         total.setPaddingTop(8);
         table.addCell(total);
 
-        centered(table, "Mulțumim!", PdfFonts.bold(10), 12);
-        centered(table, "Document demonstrativ, fără valoare fiscală.", font(PdfFonts.regular(7), MUTED), 4);
+        centered(table, "Thank you!", PdfFonts.bold(10), 12);
+        centered(table, "Demo document, not a fiscal receipt.", font(PdfFonts.regular(7), MUTED), 4);
         return table;
     }
 

@@ -17,10 +17,10 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
         // A relative address, so "Try it" calls the server the page was opened from
         servers = @Server(url = "/"),
         tags = {
-                @Tag(name = "Parcare", description = "Starea parcării și fluxul live"),
-                @Tag(name = "Bilete", description = "Biletul, codul QR și chitanța"),
-                @Tag(name = "Mașini", description = "Mașinile înregistrate (rolul READ_CARS)"),
-                @Tag(name = "Încasări", description = "Biletele plătite și raportul (rolul INVOICING)")
+                @Tag(name = "Lot", description = "The parking lot now and the live feed"),
+                @Tag(name = "Tickets", description = "A ticket, its QR code and its receipt"),
+                @Tag(name = "Cars", description = "The subscription cars (role READ_CARS)"),
+                @Tag(name = "Billing", description = "Paid tickets and the report (role INVOICING)")
         })
 public class ParkingLotApplication extends Application {
 }

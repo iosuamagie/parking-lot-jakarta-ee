@@ -28,7 +28,7 @@ ParkPulse started as a lab project for a Jakarta EE course at Lucian Blaga Unive
 - An **EJB timer** runs a traffic simulator on an **accelerated parking clock** (60× real time), so a few minutes on the page show hours of parking and real prices.
 - Changes reach every open page over **server-sent events** (JAX-RS SSE), with a heartbeat and automatic reconnect.
 - Cars are **drawn in code** as pixel sprites: five shapes, many colours, full routes through the barriers, backing out of the spot, a queue at the gate.
-- **Tickets** have unguessable codes, a server-side **QR code** (ZXing, as SVG) and an **80 mm PDF receipt** (OpenPDF, with Romanian letters).
+- **Tickets** have unguessable codes, a server-side **QR code** (ZXing, as SVG) and an **80 mm PDF receipt** (OpenPDF).
 - A **billing page** and an A4 **PDF report**, behind role-based security (Jakarta Security, PBKDF2 hashes, CSRF tokens).
 - The API is described with **MicroProfile OpenAPI** and browsable in **Swagger UI**.
 - **Integration tests** start the real app in Docker with Testcontainers and use it like a browser and an API client; GitHub Actions runs them on every push.
@@ -36,7 +36,7 @@ ParkPulse started as a lab project for a Jakarta EE course at Lucian Blaga Unive
 ## What you see
 
 - **The live lot** (`/`, public): 24 spots with numbers painted on the asphalt, three spots for people with disabilities, and cars of five shapes and many colours. Each car drives the whole way: through the entry barrier, along the aisle and into its spot. When it leaves, it backs out and goes through the exit barrier. Cards on the left show free spots, today's money, cars today and the average stay; the right column lists the latest entries and exits. Updates arrive over server-sent events.
-- **The ticket**: click a car or a line of the activity list and the ticket grows out of it. Its QR code "prints" row by row, and the amount due keeps climbing while the car is parked. The QR code opens the ticket on its own page (`/bilet/{code}`), made for phones. After the car leaves, the ticket offers a PDF receipt, 80 mm wide like a till receipt.
+- **The ticket**: click a car or a line of the activity list and the ticket grows out of it. Its QR code "prints" row by row, and the amount due keeps climbing while the car is parked. The QR code opens the ticket on its own page (`/ticket/{code}`), made for phones. After the car leaves, the ticket offers a PDF receipt, 80 mm wide like a till receipt.
 - **Billing** (`/billing`, role `INVOICING`): money per period with a bar for each day, the paid tickets with search and pages, and a PDF report for any period of up to 366 days.
 - **API docs** (`/api-docs`, public): Swagger UI on the OpenAPI document that Payara builds from the annotations (`/openapi`).
 - **Subscriptions and users** (staff, `/Cars` and `/Users`): cars with a reserved spot, an owner and a photo, kept apart from the simulated cars on the map, and the users with their roles.
@@ -52,7 +52,7 @@ ParkPulse started as a lab project for a Jakarta EE course at Lucian Blaga Unive
   </tr>
 </table>
 
-The parking lot has its own clock that runs 60 times faster than real time, so a few minutes on the page show the stays and prices of a few hours. The tariff is 15 free minutes, then 6 lei per hour, charged for every started minute.
+The parking lot has its own clock that runs 60 times faster than real time, so a few minutes on the page show the stays and prices of a few hours. The tariff is 15 free minutes, then 6 RON per hour, charged for every started minute.
 
 Ticket codes are 22 random characters, so nobody can guess another person's ticket. Because the cars are simulated, the live map shares their codes with everyone; a real lot would only print them on the paper ticket.
 

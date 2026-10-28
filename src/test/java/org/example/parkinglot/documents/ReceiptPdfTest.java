@@ -36,8 +36,8 @@ class ReceiptPdfTest {
         String text = textOf(ReceiptPdf.render(finishedTicket()));
         assertTrue(text.contains("PP-00042"), text);
         assertTrue(text.contains("SB-47-XYZ"), text);
-        assertTrue(text.contains("10,30 lei"), text);
-        assertTrue(text.contains("Chitanță"), text);
+        assertTrue(text.contains("10.30 RON"), text);
+        assertTrue(text.contains("Receipt"), text);
         assertTrue(text.contains("13:58"), text); // Romanian time (UTC+2)
     }
 

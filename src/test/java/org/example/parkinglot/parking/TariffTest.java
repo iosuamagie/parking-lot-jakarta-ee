@@ -23,8 +23,9 @@ class TariffTest {
     }
 
     @Test
-    void amountsAreShownInLei() {
-        assertEquals("10,30 lei", Tariff.format(1030));
-        assertEquals("0,00 lei", Tariff.format(0));
+    void amountsAreShownInRon() {
+        assertEquals("10.30 RON", Tariff.format(1030));
+        assertEquals("1,234.50 RON", Tariff.format(123450));
+        assertEquals("0.00 RON", Tariff.format(0));
     }
 }

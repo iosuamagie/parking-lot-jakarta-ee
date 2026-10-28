@@ -20,12 +20,13 @@ import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 /** The billing report for a period: totals, a table per day and every paid ticket, on A4 pages. */
 public final class ReportPdf {
-    private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
     private static final DateTimeFormatter DATE_TIME =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(AcceleratedClock.ZONE);
+            DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.ENGLISH).withZone(AcceleratedClock.ZONE);
     private static final Color HEADER = new Color(0xee, 0xf2, 0xff);
     private static final Color MUTED = new Color(0x6b, 0x72, 0x80);
     private static final Color LINE = new Color(0xe5, 0xe7, 0xeb);
@@ -37,11 +38,11 @@ public final class ReportPdf {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4, 40, 40, 40, 40);
         PdfWriter.getInstance(document, out);
-        document.addTitle("Raport de încasări");
+        document.addTitle("Billing report");
         document.open();
 
-        document.add(new Paragraph("ParkPulse · Raport de încasări", PdfFonts.bold(18)));
-        Paragraph period = new Paragraph("Perioada " + DAY.format(summary.from()) + " – " + DAY.format(summary.to()),
+        document.add(new Paragraph("ParkPulse · Billing report", PdfFonts.bold(18)));
+        Paragraph period = new Paragraph("Period " + DAY.format(summary.from()) + " – " + DAY.format(summary.to()),
                 colored(PdfFonts.regular(10), MUTED));
         period.setSpacingAfter(14);
         document.add(period);
@@ -50,28 +51,28 @@ public final class ReportPdf {
         totals.setWidthPercentage(60);
         totals.setHorizontalAlignment(Element.ALIGN_LEFT);
         totals.setSpacingAfter(16);
-        pair(totals, "Total încasat", Tariff.format(summary.totalBani()), true);
-        pair(totals, "Perioada anterioară", Tariff.format(summary.previousPeriodTotalBani()), false);
-        pair(totals, "Bilete plătite", String.valueOf(summary.paidTickets()), false);
-        pair(totals, "Medie pe bilet", Tariff.format(summary.averageBani()), false);
+        pair(totals, "Total", Tariff.format(summary.totalBani()), true);
+        pair(totals, "Previous period", Tariff.format(summary.previousPeriodTotalBani()), false);
+        pair(totals, "Paid tickets", String.valueOf(summary.paidTickets()), false);
+        pair(totals, "Average per ticket", Tariff.format(summary.averageBani()), false);
         pair(totals, "Gratuite (sub 15 minute)", String.valueOf(summary.freeTickets()), false);
         document.add(totals);
 
-        document.add(heading("Pe zile"));
-        PdfPTable days = table(new float[]{2, 1, 1.5f}, "Zi", "Bilete", "Total");
+        document.add(heading("Per day"));
+        PdfPTable days = table(new float[]{2, 1, 1.5f}, "Day", "Tickets", "Total");
         for (DayTotalDto day : summary.days()) {
             cells(days, DAY.format(day.day()), String.valueOf(day.tickets()), Tariff.format(day.totalBani()));
         }
         days.setSpacingAfter(16);
         document.add(days);
 
-        document.add(heading("Bilete plătite"));
+        document.add(heading("Paid tickets"));
         PdfPTable list = table(new float[]{1.2f, 1.4f, 0.7f, 1.6f, 1.6f, 1.2f},
-                "Bilet", "Număr", "Loc", "Intrare", "Ieșire", "Sumă");
+                "Ticket", "Plate", "Spot", "Entered", "Left", "Amount");
         for (PaidTicketDto ticket : tickets) {
             cells(list, ticket.ticketNumber(), ticket.plate(), ticket.spot(), DATE_TIME.format(ticket.enteredAt()),
                     DATE_TIME.format(ticket.exitedAt()),
-                    ticket.amountBani() == 0 ? "gratuit" : Tariff.format(ticket.amountBani()));
+                    ticket.amountBani() == 0 ? "free" : Tariff.format(ticket.amountBani()));
         }
         document.add(list);
 
