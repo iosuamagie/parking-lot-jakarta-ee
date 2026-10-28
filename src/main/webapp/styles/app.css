@@ -333,6 +333,11 @@ main { flex: 1; }
 .pp-pager { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 12px; font-size: 13px; color: var(--pp-muted); }
 .pp-pill.disabled { opacity: .45; pointer-events: none; }
 
+/* --- API docs --- */
+.pp-api-docs { padding: 0 12px 24px; }
+.pp-api-docs .swagger-ui .topbar { display: none; }
+.pp-api-docs .swagger-ui .info { margin: 12px 0; }
+
 /* --- Footer --- */
 footer { text-align: center; padding: 2rem 0; color: var(--pp-soft); font-size: 13px; }
 

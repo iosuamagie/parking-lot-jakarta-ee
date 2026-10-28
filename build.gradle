@@ -37,6 +37,8 @@ configurations {
 dependencies {
     compileOnly('jakarta.platform:jakarta.jakartaee-api:10.0.0')
     compileOnly('org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1')
+    // Payara has MicroProfile OpenAPI built in; the annotations only describe the API at /openapi
+    compileOnly('org.eclipse.microprofile.openapi:microprofile-openapi-api:4.0.2')
     // Shipped inside the WAR, so the server needs no driver setup
     implementation('org.postgresql:postgresql:42.7.14')
     // QR codes for the parking tickets
@@ -44,6 +46,8 @@ dependencies {
     // PDF receipts and reports; the extra fonts have the Romanian letters (ă, ș, ț)
     implementation('com.github.librepdf:openpdf:3.0.5')
     implementation('com.github.librepdf:openpdf-fonts-extra:3.0.5')
+    // Swagger UI files, served from the WAR at /webjars/swagger-ui/5.33.2/
+    implementation('org.webjars:swagger-ui:5.33.2')
 
     // The server provides the Jakarta EE classes at runtime; the tests need them on their own classpath
     testImplementation('jakarta.platform:jakarta.jakartaee-api:10.0.0')

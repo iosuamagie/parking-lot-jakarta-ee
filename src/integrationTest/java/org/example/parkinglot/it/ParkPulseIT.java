@@ -8,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -301,6 +302,27 @@ class ParkPulseIT {
         HttpResponse<String> response = browser.get("/api/tickets/" + aParkedTicketCode(browser) + "/receipt.pdf");
         assertEquals(409, response.statusCode());
         assertTrue(response.body().contains("Chitanța apare după ieșire"));
+    }
+
+    // --- API docs ---
+
+    @Test
+    void theOpenApiDocumentListsTheRoutes() {
+        String doc = new Browser(ParkPulseServer.baseUrl()).get("/openapi?format=json").body();
+        for (String path : List.of("/api/lot", "/api/events", "/api/tickets/{code}", "/api/tickets/{code}/receipt.pdf",
+                "/api/billing/tickets", "/api/cars")) {
+            assertTrue(doc.contains("\"" + path + "\""), path);
+        }
+        assertTrue(doc.contains("ParkPulse API"), doc);
+        // "Try it" must call the address the page was opened with, not the container's own name
+        assertTrue(doc.contains("\"servers\":[{\"url\":\"/\""), doc);
+    }
+
+    @Test
+    void theApiDocsPageLoadsSwaggerUi() {
+        Browser browser = new Browser(ParkPulseServer.baseUrl());
+        assertTrue(browser.get("/api-docs").body().contains("swagger-ui-bundle.js"));
+        assertEquals(200, browser.get("/webjars/swagger-ui/5.33.2/swagger-ui-bundle.js").statusCode());
     }
 
     // --- Photo uploads ---

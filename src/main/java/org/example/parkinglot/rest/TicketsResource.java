@@ -11,6 +11,10 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.example.parkinglot.common.TicketDto;
 import org.example.parkinglot.documents.QrSvg;
 import org.example.parkinglot.documents.ReceiptPdf;
@@ -20,6 +24,7 @@ import org.example.parkinglot.ejb.ParkingSessionBean;
  * Public tickets: whoever has the (unguessable) ticket code can see the ticket, like with a paper ticket.
  */
 @Path("/tickets")
+@Tag(name = "Bilete")
 public class TicketsResource {
     private static final String SVG = "image/svg+xml";
     private static final String PDF = "application/pdf";
@@ -33,7 +38,13 @@ public class TicketsResource {
     @GET
     @Path("/{code}")
     @Produces(MediaType.APPLICATION_JSON)
-    public TicketDto find(@PathParam("code") String code) {
+    @Operation(summary = "Un bilet", description = "Cât mașina e în parcare, exitedAt și amountBani lipsesc; "
+            + "suma de până acum se calculează din clockNow și tarif.")
+    @APIResponse(responseCode = "200", description = "Biletul")
+    @APIResponse(responseCode = "404", description = "Codul nu e valid sau biletul nu există")
+    public TicketDto find(
+            @Parameter(description = "Codul biletului, 22 de caractere", example = "o2dnnRdS1JKEc7OESPdvvA")
+            @PathParam("code") String code) {
         return parkingSessionBean.findTicket(code).orElseThrow(NotFoundException::new);
     }
 
@@ -41,7 +52,12 @@ public class TicketsResource {
     @GET
     @Path("/{code}/qr.svg")
     @Produces(SVG)
-    public Response qr(@PathParam("code") String code) {
+    @Operation(summary = "Codul QR al biletului", description = "Un SVG care deschide pagina /bilet/{code}.")
+    @APIResponse(responseCode = "200", description = "Imaginea SVG")
+    @APIResponse(responseCode = "404", description = "Codul nu e valid sau biletul nu există")
+    public Response qr(
+            @Parameter(description = "Codul biletului, 22 de caractere", example = "o2dnnRdS1JKEc7OESPdvvA")
+            @PathParam("code") String code) {
         TicketDto ticket = find(code);
         CacheControl cache = new CacheControl();
         cache.setMaxAge(24 * 60 * 60);
@@ -54,7 +70,13 @@ public class TicketsResource {
     @GET
     @Path("/{code}/receipt.pdf")
     @Produces({PDF, MediaType.TEXT_PLAIN})
-    public Response receipt(@PathParam("code") String code) {
+    @Operation(summary = "Chitanța PDF", description = "Există doar după ce mașina a ieșit.")
+    @APIResponse(responseCode = "200", description = "Chitanța, 80 mm lățime")
+    @APIResponse(responseCode = "404", description = "Codul nu e valid sau biletul nu există")
+    @APIResponse(responseCode = "409", description = "Mașina e încă în parcare")
+    public Response receipt(
+            @Parameter(description = "Codul biletului, 22 de caractere", example = "o2dnnRdS1JKEc7OESPdvvA")
+            @PathParam("code") String code) {
         TicketDto ticket = find(code);
         if (ticket.exitedAt() == null) {
             return Response.status(Response.Status.CONFLICT)
