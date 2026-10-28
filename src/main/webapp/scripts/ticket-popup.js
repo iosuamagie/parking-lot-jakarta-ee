@@ -1,10 +1,10 @@
 // The ticket popup of the live page: it grows out of the clicked car (FLIP), the QR code "prints" row by row.
 import { renderTicket } from './ticket-card.js';
+import { animationsOn } from './motion.js';
 
 const ctx = document.body.dataset.ctx || '';
 const OPEN_MS = 520;
 const CLOSE_MS = 340;
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let overlay = null;
 let holder = null;
@@ -92,7 +92,7 @@ export async function openTicket(code, rect) {
 
   overlay.hidden = false;
   requestAnimationFrame(() => overlay.classList.add('on'));
-  if (!reducedMotion && fromRect) {
+  if (animationsOn() && fromRect) {
     const target = card.element.getBoundingClientRect();
     card.element.animate(
       [{ transform: flip(fromRect, target), opacity: 0.3 }, { transform: 'none', opacity: 1 }],
@@ -118,7 +118,7 @@ export function closeTicket() {
     return;
   }
   overlay.classList.remove('on');
-  if (reducedMotion || !fromRect) {
+  if (!animationsOn() || !fromRect) {
     closeNow();
     return;
   }

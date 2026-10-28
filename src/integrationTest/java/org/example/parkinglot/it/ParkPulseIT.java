@@ -258,6 +258,8 @@ class ParkPulseIT {
         String body = new Browser(ParkPulseServer.baseUrl()).get("/").body();
         assertTrue(body.contains("id=\"lot\""));
         assertTrue(body.contains("Autentificare"));
+        // Visitors who turned animations off in their system can still switch them on here
+        assertTrue(body.contains("id=\"motion-toggle\""));
     }
 
     // --- Tickets ---

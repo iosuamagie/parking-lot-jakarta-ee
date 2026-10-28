@@ -3,11 +3,12 @@ import { createLot } from './lot-renderer.js';
 import { spotAt, spotRect, W, H } from './lot-geometry.js';
 import { openTicket, ticketExited, showToast } from './ticket-popup.js';
 import { formatLei } from './tariff.js';
+import { animationsOn, setAnimations } from './motion.js';
 
 const ACTIVITY_LIMIT = 20;
 const ctx = document.body.dataset.ctx || '';
 const canvas = document.getElementById('lot');
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let reducedMotion = !animationsOn();
 const lot = createLot(canvas, { reducedMotion });
 
 const timeFormat = new Intl.DateTimeFormat('ro-RO', { timeZone: 'Europe/Bucharest', hour: '2-digit', minute: '2-digit' });
@@ -219,6 +220,19 @@ $('activity').addEventListener('keydown', e => {
 });
 
 document.addEventListener('ticket:closed', () => lot.select(null));
+
+const motionToggle = $('motion-toggle');
+function showMotionChoice() {
+  motionToggle.setAttribute('aria-pressed', String(!reducedMotion));
+  motionToggle.textContent = reducedMotion ? 'Animații oprite' : 'Animații pornite';
+}
+motionToggle.addEventListener('click', () => setAnimations(reducedMotion));
+document.addEventListener('motion:change', e => {
+  reducedMotion = !e.detail.on;
+  lot.setReducedMotion(reducedMotion);
+  showMotionChoice();
+});
+showMotionChoice();
 
 connect();
 tickClock();

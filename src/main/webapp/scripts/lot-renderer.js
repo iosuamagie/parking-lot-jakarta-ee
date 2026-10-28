@@ -119,7 +119,8 @@ function positionOn(route, d) {
   };
 }
 
-export function createLot(canvas, { reducedMotion = false } = {}) {
+export function createLot(canvas, { reducedMotion: startReduced = false } = {}) {
+  let reducedMotion = startReduced;
   const ctx = canvas.getContext('2d');
   let accessible = new Set(['A01', 'A02', 'A03']);
   let background = drawBackground(accessible);
@@ -293,6 +294,11 @@ export function createLot(canvas, { reducedMotion = false } = {}) {
 
     select(spot) {
       selected = spot;
+    },
+
+    /** Cars still on their way finish where they are going when motion is switched off. */
+    setReducedMotion(value) {
+      reducedMotion = value;
     }
   };
 }

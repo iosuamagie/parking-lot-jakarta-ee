@@ -28,6 +28,7 @@
             <div class="pp-panel-head">
                 <h2 id="lot-title">Parcarea acum</h2>
                 <span class="pp-clock" id="clock">Ora parcării --:--</span>
+                <button type="button" class="pp-pill pp-motion-toggle" id="motion-toggle" aria-pressed="true">Animații pornite</button>
                 <span class="pp-live-badge off" id="live-badge"><span class="pp-dot"></span>Conectare…</span>
             </div>
             <canvas id="lot" width="320" height="128" role="img"
