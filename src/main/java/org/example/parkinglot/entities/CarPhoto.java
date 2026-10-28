@@ -17,11 +17,11 @@ public class CarPhoto {
     @Column(name = "file_type")
     private String fileType;
 
-    // 1. Câmpul pentru conținutul fișierului (adăugat conform cerinței)
+    // The file's bytes
     @Column(name = "file_content")
     private byte[] fileContent;
 
-    // 2. Asocierea OneToOne cu entitatea Car (adăugată conform cerinței)
+    // The car this photo belongs to
     @OneToOne
     private Car car;
 

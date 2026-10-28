@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.util.Locale;
 
 /**
- * The parking tariff: the first 15 minutes are free, then 6 lei per hour, charged for every started minute.
- * Amounts are whole bani (1 leu = 100 bani), so there are no rounding errors.
+ * The parking tariff: the first 15 minutes are free, then 6 RON per hour, charged for every started minute.
+ * Amounts are whole bani (1 RON = 100 bani), so there are no rounding errors.
  */
 public final class Tariff {
     public static final int FREE_MINUTES = 15;
@@ -23,8 +23,8 @@ public final class Tariff {
         return Math.toIntExact(startedMinutes * BANI_PER_MINUTE);
     }
 
-    /** Writes an amount the Romanian way, e.g. 1030 → "10,30 lei". */
+    /** Writes an amount in Romanian lei (RON), e.g. 1030 → "10.30 RON" and 123450 → "1,234.50 RON". */
     public static String format(int bani) {
-        return String.format(Locale.ROOT, "%d,%02d lei", bani / 100, bani % 100);
+        return String.format(Locale.US, "%,d.%02d RON", bani / 100, bani % 100);
     }
 }

@@ -89,7 +89,7 @@ class ParkPulseIT {
     void adminCanManageCarsAndUsers() {
         Browser admin = Browser.loggedInAs("admin");
         String cars = admin.get("/Cars").body();
-        assertTrue(cars.contains("Adaugă abonament"));
+        assertTrue(cars.contains("Add subscription"));
         assertTrue(cars.contains("SB-01-PKP"));
         assertTrue(admin.get("/Users").body().contains("Add User"));
     }
@@ -99,7 +99,7 @@ class ParkPulseIT {
         Browser viewer = Browser.loggedInAs("viewer");
         String cars = viewer.get("/Cars").body();
         assertTrue(cars.contains("SB-01-PKP"));
-        assertFalse(cars.contains("Adaugă abonament"));
+        assertFalse(cars.contains("Add subscription"));
         assertEquals(403, viewer.get("/AddCar").statusCode());
         assertEquals(403, viewer.get("/EditUser?id=1").statusCode());
         // The old invoice form is gone, so nobody can POST to the user list any more
@@ -111,7 +111,7 @@ class ParkPulseIT {
     @Test
     void billingSeesTheBillingPage() {
         String page = Browser.loggedInAs("billing").get("/billing").body();
-        assertTrue(page.contains("Raport PDF pe perioadă"), page);
+        assertTrue(page.contains("PDF report for this period"), page);
         assertTrue(page.contains("PP-"), page);
     }
 
@@ -257,7 +257,8 @@ class ParkPulseIT {
     void theHomePageIsTheLiveLotForEveryone() {
         String body = new Browser(ParkPulseServer.baseUrl()).get("/").body();
         assertTrue(body.contains("id=\"lot\""));
-        assertTrue(body.contains("Autentificare"));
+        assertTrue(body.contains("Sign in"));
+        assertTrue(body.contains("<html lang=\"en\">"));
         // Visitors who turned animations off in their system can still switch them on here
         assertTrue(body.contains("id=\"motion-toggle\""));
         // The logo is the name with a heartbeat line through it
@@ -290,10 +291,10 @@ class ParkPulseIT {
         assertEquals(404, browser.get("/api/tickets/" + "x".repeat(500)).statusCode());
         assertEquals(404, browser.get("/api/tickets/AAAAAAAAAAAAAAAAAAAAAA").statusCode());
         assertEquals(404, browser.get("/api/tickets/abc/qr.svg").statusCode());
-        assertEquals(404, browser.get("/bilet/AAAAAAAAAAAAAAAAAAAAAA").statusCode());
-        assertEquals(404, browser.get("/bilet/").statusCode());
+        assertEquals(404, browser.get("/ticket/AAAAAAAAAAAAAAAAAAAAAA").statusCode());
+        assertEquals(404, browser.get("/ticket/").statusCode());
         // Payara itself turns down encoded slashes, before the request reaches the app
-        assertEquals(400, browser.get("/bilet/..%2F..%2Fetc").statusCode());
+        assertEquals(400, browser.get("/ticket/..%2F..%2Fetc").statusCode());
     }
 
     @Test
@@ -309,7 +310,7 @@ class ParkPulseIT {
     void theTicketPageOpensForEveryone() {
         Browser browser = new Browser(ParkPulseServer.baseUrl());
         String code = aParkedTicketCode(browser);
-        HttpResponse<String> response = browser.get("/bilet/" + code);
+        HttpResponse<String> response = browser.get("/ticket/" + code);
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("data-ticket-code=\"" + code + "\""));
     }
@@ -331,7 +332,7 @@ class ParkPulseIT {
         Browser browser = new Browser(ParkPulseServer.baseUrl());
         HttpResponse<String> response = browser.get("/api/tickets/" + aParkedTicketCode(browser) + "/receipt.pdf");
         assertEquals(409, response.statusCode());
-        assertTrue(response.body().contains("Chitanța apare după ieșire"));
+        assertTrue(response.body().contains("The receipt is ready once the car has left"));
     }
 
     // --- API docs ---
@@ -377,7 +378,7 @@ class ParkPulseIT {
         String plate = "NP-" + shortId();
         assertEquals(302, addCar(admin, plate, "N-" + shortId()).statusCode());
         String page = admin.get("/Cars").body();
-        assertTrue(page.contains("Abonamente"), page);
+        assertTrue(page.contains("Subscriptions"), page);
         // No request for a photo that does not exist (it showed as a broken image)
         assertTrue(page.contains("pp-no-photo"), page);
     }

@@ -6,11 +6,11 @@ public class CarPhotoDto {
     private String fileType;
     private byte[] fileContent;
 
-    // Constructor fără argumente
+    // No-argument constructor
     public CarPhotoDto() {
     }
 
-    // Constructor cu toate argumentele
+    // Constructor with all fields
     public CarPhotoDto(Long id, String filename, String fileType, byte[] fileContent) {
         this.id = id;
         this.filename = filename;

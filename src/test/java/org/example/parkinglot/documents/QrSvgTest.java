@@ -13,7 +13,7 @@ class QrSvgTest {
 
     @Test
     void everyMatrixRowIsAGroupInsideAQuietZone() {
-        String svg = QrSvg.svg("http://localhost:8081/bilet/AAAAAAAAAAAAAAAAAAAAAA");
+        String svg = QrSvg.svg("http://localhost:8081/ticket/AAAAAAAAAAAAAAAAAAAAAA");
         Matcher matcher = Pattern.compile("viewBox=\"0 0 (\\d+) \\1\"").matcher(svg);
         assertTrue(matcher.find());
         int size = Integer.parseInt(matcher.group(1));

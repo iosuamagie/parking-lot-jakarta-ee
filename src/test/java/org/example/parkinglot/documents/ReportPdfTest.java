@@ -29,13 +29,13 @@ class ReportPdfTest {
 
         String text = ReceiptPdfTest.textOf(ReportPdf.render(summary, tickets));
 
-        assertTrue(text.contains("Raport de încasări"), text);
+        assertTrue(text.contains("Billing report"), text);
         assertTrue(text.contains("Total"), text);
-        assertTrue(text.contains("14,30 lei"), text);
-        assertTrue(text.contains("27.10.2026"), text);
+        assertTrue(text.contains("14.30 RON"), text);
+        assertTrue(text.contains("27 Oct 2026"), text);
         for (String number : List.of("PP-00001", "PP-00002", "PP-00003")) {
             assertTrue(text.contains(number), number);
         }
-        assertTrue(text.contains("gratuit"), text);
+        assertTrue(text.contains("free"), text);
     }
 }

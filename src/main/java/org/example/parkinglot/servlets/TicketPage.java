@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 /** The ticket on its own page (/bilet/{code}), the one the QR code opens. Public, like the ticket itself. */
-@WebServlet(name = "TicketPage", value = "/bilet/*")
+@WebServlet(name = "TicketPage", value = "/ticket/*")
 public class TicketPage extends HttpServlet {
 
     @Inject

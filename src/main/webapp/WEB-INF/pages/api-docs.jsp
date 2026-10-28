@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="${swagger}/swagger-ui.css">
     <div class="pp-api-docs">
         <section class="pp-panel">
-            <div id="swagger"><p class="pp-muted">Se încarcă documentația…</p></div>
+            <div id="swagger"><p class="pp-muted">Loading the documentation…</p></div>
         </section>
     </div>
     <script src="${swagger}/swagger-ui-bundle.js"></script>

@@ -1,4 +1,4 @@
-// The /bilet/{code} page: the ticket on the whole screen, refreshed while the car is parked.
+// The /ticket/{code} page: the ticket on the whole screen, refreshed while the car is parked.
 import { renderTicket } from './ticket-card.js';
 
 const ctx = document.body.dataset.ctx || '';
@@ -15,7 +15,7 @@ async function fetchTicket() {
 async function start() {
   const [ticket, qr] = await Promise.all([fetchTicket(), fetch(`${path}/qr.svg`).then(r => r.ok ? r.text() : '')]);
   if (!ticket) {
-    container.textContent = 'Biletul nu a fost găsit.';
+    container.textContent = 'Ticket not found.';
     return;
   }
   const card = renderTicket(container, ticket, qr);

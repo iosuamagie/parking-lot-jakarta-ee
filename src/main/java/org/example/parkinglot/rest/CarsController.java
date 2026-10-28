@@ -20,7 +20,7 @@ import java.util.List;
  * Read-only JSON API for the cars. Access needs the READ_CARS role, set as a security constraint in web.xml.
  */
 @Path("/cars")
-@Tag(name = "Mașini")
+@Tag(name = "Cars")
 public class CarsController {
 
     @Inject
@@ -28,8 +28,8 @@ public class CarsController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Toate mașinile înregistrate")
-    @APIResponse(responseCode = "200", description = "Lista mașinilor")
+    @Operation(summary = "All subscription cars")
+    @APIResponse(responseCode = "200", description = "The cars")
     public List<CarDto> findAll() {
         return carsBean.findAllCars();
     }
@@ -37,10 +37,10 @@ public class CarsController {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "O mașină")
-    @APIResponse(responseCode = "200", description = "Mașina")
-    @APIResponse(responseCode = "404", description = "Nu există mașina")
-    public CarDto findById(@Parameter(description = "Id-ul mașinii", example = "1") @PathParam("id") Long id) {
+    @Operation(summary = "One car")
+    @APIResponse(responseCode = "200", description = "The car")
+    @APIResponse(responseCode = "404", description = "No such car")
+    public CarDto findById(@Parameter(description = "The car's id", example = "1") @PathParam("id") Long id) {
         CarDto car = carsBean.findById(id);
         if (car == null) {
             throw new NotFoundException();

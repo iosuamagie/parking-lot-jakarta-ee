@@ -22,15 +22,15 @@ public record BillingPeriod(LocalDate from, LocalDate to) {
             return new BillingPeriod(today.minusDays(DEFAULT_DAYS - 1), today);
         }
         if (noFrom || noTo) {
-            throw new IllegalArgumentException("Alege și data de început, și data de sfârșit.");
+            throw new IllegalArgumentException("Choose both a start date and an end date.");
         }
         LocalDate start = date(from);
         LocalDate end = date(to);
         if (start.isAfter(end)) {
-            throw new IllegalArgumentException("Data de început e după data de sfârșit.");
+            throw new IllegalArgumentException("The start date is after the end date.");
         }
         if (ChronoUnit.DAYS.between(start, end) + 1 > MAX_DAYS) {
-            throw new IllegalArgumentException("Perioada poate avea cel mult " + MAX_DAYS + " de zile.");
+            throw new IllegalArgumentException("A period can be at most " + MAX_DAYS + " days long.");
         }
         return new BillingPeriod(start, end);
     }
@@ -40,10 +40,10 @@ public record BillingPeriod(LocalDate from, LocalDate to) {
         try {
             date = LocalDate.parse(value.trim());
         } catch (DateTimeParseException ex) {
-            throw new IllegalArgumentException("Data trebuie scrisă ca AAAA-LL-ZZ, de exemplu 2026-10-27.", ex);
+            throw new IllegalArgumentException("Write the date as YYYY-MM-DD, for example 2026-10-27.", ex);
         }
         if (date.getYear() < FIRST_YEAR || date.getYear() > LAST_YEAR) {
-            throw new IllegalArgumentException("Alege o dată între anii " + FIRST_YEAR + " și " + LAST_YEAR + ".");
+            throw new IllegalArgumentException("Choose a date between the years " + FIRST_YEAR + " and " + LAST_YEAR + ".");
         }
         return date;
     }

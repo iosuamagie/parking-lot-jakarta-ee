@@ -1,9 +1,9 @@
-// Draws a parking ticket (used by the popup on the live page and by the /bilet/{code} page).
-import { amountBani, formatLei } from './tariff.js';
+// Draws a parking ticket (used by the popup on the live page and by the /ticket/{code} page).
+import { amountBani, formatRon } from './tariff.js';
 import { animationsOn } from './motion.js';
 
 const ctx = document.body.dataset.ctx || '';
-const dateTime = new Intl.DateTimeFormat('ro-RO', {
+const dateTime = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/Bucharest', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
 });
 
@@ -30,10 +30,10 @@ function formatDuration(totalSeconds) {
 /** Turns the SVG text from the server into an element, without putting it through innerHTML. */
 function qrElement(qrSvgText) {
   const parsed = new DOMParser().parseFromString(qrSvgText, 'image/svg+xml').documentElement;
-  if (parsed.nodeName !== 'svg') return el('div', 'pp-qr-missing', 'QR indisponibil');
+  if (parsed.nodeName !== 'svg') return el('div', 'pp-qr-missing', 'QR code unavailable');
   const svg = document.importNode(parsed, true);
   svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-label', 'Codul QR al biletului');
+  svg.setAttribute('aria-label', 'The ticket QR code');
   return svg;
 }
 
@@ -47,7 +47,7 @@ export function renderTicket(container, ticket, qrSvgText) {
   const card = el('article', 'pp-ticket');
   const top = el('div', 'pp-ticket-top');
   const head = el('div', 'pp-ticket-head');
-  const title = el('span', null, 'BILET DE PARCARE · ');
+  const title = el('span', null, 'PARKING TICKET · ');
   const number = el('b');
   title.append(number);
   head.append(title);
@@ -60,14 +60,14 @@ export function renderTicket(container, ticket, qrSvgText) {
   const chips = el('div', 'pp-chips');
   firstLine.append(plate, chips);
 
-  const spot = row('Loc');
-  const entered = row('Intrare');
-  const exited = row('Ieșire');
-  const duration = row('Durată');
+  const spot = row('Spot');
+  const entered = row('Entered');
+  const exited = row('Left');
+  const duration = row('Stay');
   duration.value.classList.add('pp-tabular');
   const dueLabel = el('div', 'pp-due-label');
   const due = el('div', 'pp-due');
-  const note = el('div', 'pp-ticket-note', 'Primele 15 minute gratuit · apoi 6 lei/oră');
+  const note = el('div', 'pp-ticket-note', 'First 15 minutes free · then 6 RON/hour');
   body.append(firstLine, spot.line, entered.line, exited.line, duration.line, dueLabel, due, note);
   top.append(head, body);
 
@@ -76,8 +76,8 @@ export function renderTicket(container, ticket, qrSvgText) {
   const svg = qrElement(qrSvgText);
   qr.style.setProperty('--rows', svg.querySelectorAll ? svg.querySelectorAll('.qr-row').length : 0);
   qr.append(svg, el('div', 'pp-qr-scan'));
-  const qrNote = el('div', 'pp-qr-note', 'Scanează ca să urmărești biletul pe telefon');
-  const openPage = el('a', 'pp-open-page', 'Deschide în pagină nouă ↗');
+  const qrNote = el('div', 'pp-qr-note', 'Scan to follow the ticket on your phone');
+  const openPage = el('a', 'pp-open-page', 'Open in a new page ↗');
   openPage.target = '_blank';
   openPage.rel = 'noopener';
   const receipt = el('a', 'pp-receipt');
@@ -97,19 +97,19 @@ export function renderTicket(container, ticket, qrSvgText) {
     if (!isParked) exited.value.textContent = dateTime.format(new Date(t.exitedAt));
 
     chips.replaceChildren(el('span', isParked ? 'pp-chip pp-chip-parked' : 'pp-chip pp-chip-paid',
-      isParked ? '● În parcare' : 'Achitat · a ieșit'));
-    if (t.accessiblePermit) chips.append(el('span', 'pp-chip pp-chip-permit', '♿ Permis'));
+      isParked ? '● Parked' : 'Paid · left'));
+    if (t.accessiblePermit) chips.append(el('span', 'pp-chip pp-chip-permit', '♿ Permit'));
 
-    dueLabel.textContent = isParked ? 'De plată până acum' : 'Plătit';
-    openPage.href = `${ctx}/bilet/${encodeURIComponent(t.ticketCode)}`;
+    dueLabel.textContent = isParked ? 'Due so far' : 'Paid';
+    openPage.href = `${ctx}/ticket/${encodeURIComponent(t.ticketCode)}`;
     if (isParked) {
       receipt.removeAttribute('href');
       receipt.setAttribute('aria-disabled', 'true');
-      receipt.textContent = 'Chitanța apare după ieșire';
+      receipt.textContent = 'Receipt after the car leaves';
     } else {
       receipt.href = `${ctx}/api/tickets/${encodeURIComponent(t.ticketCode)}/receipt.pdf`;
       receipt.removeAttribute('aria-disabled');
-      receipt.textContent = '⬇ Descarcă chitanța (PDF)';
+      receipt.textContent = '⬇ Download the receipt (PDF)';
     }
     tick();
   }
@@ -118,14 +118,14 @@ export function renderTicket(container, ticket, qrSvgText) {
     const t = current;
     if (t.exitedAt) {
       duration.value.textContent = formatDuration((Date.parse(t.exitedAt) - Date.parse(t.enteredAt)) / 1000);
-      due.textContent = t.amountBani > 0 ? formatLei(t.amountBani) : 'gratuit';
+      due.textContent = t.amountBani > 0 ? formatRon(t.amountBani) : 'free';
       return;
     }
     // The parking clock keeps running between two fetches, clockSpeed times faster than real time
     const seconds = (Date.parse(t.clockNow) - Date.parse(t.enteredAt)) / 1000
       + (performance.now() - fetchedAt) / 1000 * t.clockSpeed;
     duration.value.textContent = formatDuration(seconds);
-    due.textContent = formatLei(amountBani(seconds));
+    due.textContent = formatRon(amountBani(seconds));
   }
 
   fill();

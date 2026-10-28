@@ -13,16 +13,16 @@ import org.example.parkinglot.ejb.ParkingSessionBean;
 
 /** The public lot: who is parked where, the day's numbers and the latest activity. No login needed. */
 @Path("/lot")
-@Tag(name = "Parcare")
+@Tag(name = "Lot")
 public class LotResource {
 
     @Inject
     ParkingSessionBean parkingSessionBean;
 
     @GET
-    @Operation(summary = "Parcarea acum", description = "Locurile, mașinile parcate, cifrele zilei și "
-            + "ultimele 20 de intrări și ieșiri. Orele sunt pe ceasul parcării (de 60 de ori mai rapid).")
-    @APIResponse(responseCode = "200", description = "Starea parcării")
+    @Operation(summary = "The lot now", description = "The spots, the parked cars, today's numbers and "
+            + "the latest 20 entries and exits. Times are on the parking clock (60 times faster).")
+    @APIResponse(responseCode = "200", description = "The state of the lot")
     @Produces(MediaType.APPLICATION_JSON)
     public LotSnapshotDto snapshot() {
         return parkingSessionBean.snapshot();

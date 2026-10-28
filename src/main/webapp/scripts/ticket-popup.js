@@ -25,7 +25,7 @@ function build() {
   holder.className = 'pp-ticket-holder';
   holder.setAttribute('role', 'dialog');
   holder.setAttribute('aria-modal', 'true');
-  holder.setAttribute('aria-label', 'Bilet de parcare');
+  holder.setAttribute('aria-label', 'Parking ticket');
   overlay.append(backdrop, holder);
   document.body.append(overlay);
   document.addEventListener('keydown', e => {
@@ -77,7 +77,7 @@ export async function openTicket(code, rect) {
   if (currentCode !== code) return; // another ticket was opened meanwhile
   if (!data) {
     currentCode = null;
-    showToast('Biletul nu a fost găsit');
+    showToast('Ticket not found');
     return;
   }
 
@@ -85,7 +85,7 @@ export async function openTicket(code, rect) {
   const close = document.createElement('button');
   close.type = 'button';
   close.className = 'pp-ticket-close';
-  close.setAttribute('aria-label', 'Închide');
+  close.setAttribute('aria-label', 'Close');
   close.textContent = '✕';
   close.addEventListener('click', closeTicket);
   card.element.querySelector('.pp-ticket-head').append(close);

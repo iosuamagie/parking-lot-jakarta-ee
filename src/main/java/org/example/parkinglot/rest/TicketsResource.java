@@ -24,7 +24,7 @@ import org.example.parkinglot.ejb.ParkingSessionBean;
  * Public tickets: whoever has the (unguessable) ticket code can see the ticket, like with a paper ticket.
  */
 @Path("/tickets")
-@Tag(name = "Bilete")
+@Tag(name = "Tickets")
 public class TicketsResource {
     private static final String SVG = "image/svg+xml";
     private static final String PDF = "application/pdf";
@@ -38,12 +38,12 @@ public class TicketsResource {
     @GET
     @Path("/{code}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Un bilet", description = "Cât mașina e în parcare, exitedAt și amountBani lipsesc; "
-            + "suma de până acum se calculează din clockNow și tarif.")
-    @APIResponse(responseCode = "200", description = "Biletul")
-    @APIResponse(responseCode = "404", description = "Codul nu e valid sau biletul nu există")
+    @Operation(summary = "A ticket", description = "While the car is parked, exitedAt and amountBani are missing; "
+            + "the amount so far follows from clockNow and the tariff.")
+    @APIResponse(responseCode = "200", description = "The ticket")
+    @APIResponse(responseCode = "404", description = "The code is not valid or there is no such ticket")
     public TicketDto find(
-            @Parameter(description = "Codul biletului, 22 de caractere", example = "o2dnnRdS1JKEc7OESPdvvA")
+            @Parameter(description = "The ticket code, 22 characters", example = "o2dnnRdS1JKEc7OESPdvvA")
             @PathParam("code") String code) {
         return parkingSessionBean.findTicket(code).orElseThrow(NotFoundException::new);
     }
@@ -52,16 +52,16 @@ public class TicketsResource {
     @GET
     @Path("/{code}/qr.svg")
     @Produces(SVG)
-    @Operation(summary = "Codul QR al biletului", description = "Un SVG care deschide pagina /bilet/{code}.")
+    @Operation(summary = "The ticket's QR code", description = "An SVG that opens the page /ticket/{code}.")
     @APIResponse(responseCode = "200", description = "Imaginea SVG")
-    @APIResponse(responseCode = "404", description = "Codul nu e valid sau biletul nu există")
+    @APIResponse(responseCode = "404", description = "The code is not valid or there is no such ticket")
     public Response qr(
-            @Parameter(description = "Codul biletului, 22 de caractere", example = "o2dnnRdS1JKEc7OESPdvvA")
+            @Parameter(description = "The ticket code, 22 characters", example = "o2dnnRdS1JKEc7OESPdvvA")
             @PathParam("code") String code) {
         TicketDto ticket = find(code);
         CacheControl cache = new CacheControl();
         cache.setMaxAge(24 * 60 * 60);
-        return Response.ok(QrSvg.svg(publicUrl() + "/bilet/" + ticket.ticketCode()), SVG)
+        return Response.ok(QrSvg.svg(publicUrl() + "/ticket/" + ticket.ticketCode()), SVG)
                 .cacheControl(cache)
                 .build();
     }
@@ -70,18 +70,18 @@ public class TicketsResource {
     @GET
     @Path("/{code}/receipt.pdf")
     @Produces({PDF, MediaType.TEXT_PLAIN})
-    @Operation(summary = "Chitanța PDF", description = "Există doar după ce mașina a ieșit.")
-    @APIResponse(responseCode = "200", description = "Chitanța, 80 mm lățime")
-    @APIResponse(responseCode = "404", description = "Codul nu e valid sau biletul nu există")
-    @APIResponse(responseCode = "409", description = "Mașina e încă în parcare")
+    @Operation(summary = "The PDF receipt", description = "Only exists after the car has left.")
+    @APIResponse(responseCode = "200", description = "The receipt, 80 mm wide")
+    @APIResponse(responseCode = "404", description = "The code is not valid or there is no such ticket")
+    @APIResponse(responseCode = "409", description = "The car is still parked")
     public Response receipt(
-            @Parameter(description = "Codul biletului, 22 de caractere", example = "o2dnnRdS1JKEc7OESPdvvA")
+            @Parameter(description = "The ticket code, 22 characters", example = "o2dnnRdS1JKEc7OESPdvvA")
             @PathParam("code") String code) {
         TicketDto ticket = find(code);
         if (ticket.exitedAt() == null) {
             return Response.status(Response.Status.CONFLICT)
                     .type(MediaType.TEXT_PLAIN_TYPE.withCharset("UTF-8"))
-                    .entity("Chitanța apare după ieșire")
+                    .entity("The receipt is ready once the car has left")
                     .build();
         }
         return Response.ok(ReceiptPdf.render(ticket), PDF)

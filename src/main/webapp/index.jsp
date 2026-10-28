@@ -5,39 +5,39 @@
 
         <section class="pp-kpis" aria-label="Cifrele zilei">
             <div class="pp-kpi">
-                <div class="pp-kpi-label">Locuri libere</div>
+                <div class="pp-kpi-label">Free spots</div>
                 <div class="pp-kpi-value"><span id="kpi-free">–</span><small> / <span id="kpi-capacity">24</span></small></div>
                 <div class="pp-meter"><div id="kpi-free-bar"></div></div>
             </div>
             <div class="pp-kpi">
-                <div class="pp-kpi-label">Încasat azi</div>
+                <div class="pp-kpi-label">Earned today</div>
                 <div class="pp-kpi-value" id="kpi-revenue">–</div>
                 <div class="pp-kpi-trend" id="kpi-trend"></div>
             </div>
             <div class="pp-kpi">
-                <div class="pp-kpi-label">Mașini azi</div>
+                <div class="pp-kpi-label">Cars today</div>
                 <div class="pp-kpi-value" id="kpi-cars">–</div>
             </div>
             <div class="pp-kpi">
-                <div class="pp-kpi-label">Durata medie</div>
+                <div class="pp-kpi-label">Average stay</div>
                 <div class="pp-kpi-value" id="kpi-stay">–</div>
             </div>
         </section>
 
         <section class="pp-panel" aria-labelledby="lot-title">
             <div class="pp-panel-head">
-                <h2 id="lot-title">Parcarea acum</h2>
-                <span class="pp-clock" id="clock">Ora parcării --:--</span>
-                <button type="button" class="pp-pill pp-motion-toggle" id="motion-toggle" aria-pressed="true">Animații pornite</button>
-                <span class="pp-live-badge off" id="live-badge"><span class="pp-dot"></span>Conectare…</span>
+                <h2 id="lot-title">The lot now</h2>
+                <span class="pp-clock" id="clock">Parking time --:--</span>
+                <button type="button" class="pp-pill pp-motion-toggle" id="motion-toggle" aria-pressed="true">Animations on</button>
+                <span class="pp-live-badge off" id="live-badge"><span class="pp-dot"></span>Connecting…</span>
             </div>
             <canvas id="lot" width="320" height="128" role="img"
-                    aria-label="Harta parcării, cu mașinile parcate acum"></canvas>
-            <p class="pp-hint">Dă click pe o mașină ca să-i vezi biletul. Ceasul parcării merge de 60 de ori mai repede.</p>
+                    aria-label="Map of the parking lot with the cars parked now"></canvas>
+            <p class="pp-hint">Click a car to see its ticket. The parking clock runs 60 times faster than real time.</p>
         </section>
 
         <section class="pp-panel" aria-labelledby="activity-title">
-            <h2 id="activity-title">Activitate</h2>
+            <h2 id="activity-title">Activity</h2>
             <ol id="activity" class="pp-activity"></ol>
         </section>
     </div>

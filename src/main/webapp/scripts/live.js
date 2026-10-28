@@ -2,7 +2,7 @@
 import { createLot } from './lot-renderer.js';
 import { spotAt, spotRect, W, H } from './lot-geometry.js';
 import { openTicket, ticketExited, showToast } from './ticket-popup.js';
-import { formatLei } from './tariff.js';
+import { formatRon } from './tariff.js';
 import { animationsOn, setAnimations } from './motion.js';
 
 const ACTIVITY_LIMIT = 20;
@@ -11,7 +11,7 @@ const canvas = document.getElementById('lot');
 let reducedMotion = !animationsOn();
 const lot = createLot(canvas, { reducedMotion });
 
-const timeFormat = new Intl.DateTimeFormat('ro-RO', { timeZone: 'Europe/Bucharest', hour: '2-digit', minute: '2-digit' });
+const timeFormat = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Bucharest', hour: '2-digit', minute: '2-digit' });
 const parkedBySpot = new Map();
 let clock = { at: 0, speed: 60, realAt: performance.now() };
 
@@ -45,7 +45,7 @@ function renderStats(stats) {
   setText('kpi-free', String(stats.free));
   $('kpi-capacity').textContent = stats.capacity;
   $('kpi-free-bar').style.width = `${Math.round(100 * stats.free / stats.capacity)}%`;
-  setText('kpi-revenue', formatLei(stats.revenueTodayBani));
+  setText('kpi-revenue', formatRon(stats.revenueTodayBani));
   setText('kpi-cars', String(stats.carsToday));
   setText('kpi-stay', stats.averageStayMinutes > 0 ? formatStay(stats.averageStayMinutes) : '–');
 
@@ -53,7 +53,7 @@ function renderStats(stats) {
   const yesterday = stats.revenueYesterdaySameTimeBani;
   if (yesterday > 0) {
     const change = Math.round(100 * (stats.revenueTodayBani - yesterday) / yesterday);
-    trend.textContent = `${change >= 0 ? '▲' : '▼'} ${Math.abs(change)}% față de ieri la aceeași oră`;
+    trend.textContent = `${change >= 0 ? '▲' : '▼'} ${Math.abs(change)}% vs yesterday at this time`;
     trend.className = 'pp-kpi-trend ' + (change >= 0 ? 'up' : 'down');
   } else {
     trend.textContent = '';
@@ -70,7 +70,7 @@ function activityItem(activity, isNew) {
 
   const kind = document.createElement('span');
   kind.className = entered ? 'pp-act-in' : 'pp-act-out';
-  kind.textContent = entered ? '↘ Intrare' : '↗ Ieșire';
+  kind.textContent = entered ? '↘ Entered' : '↗ Left';
   const plate = document.createElement('span');
   plate.className = 'pp-plate-text';
   plate.textContent = activity.plate;
@@ -78,7 +78,7 @@ function activityItem(activity, isNew) {
   if (entered) {
     detail.textContent = activity.spot;
   } else {
-    detail.textContent = activity.amountBani > 0 ? formatLei(activity.amountBani) : 'gratuit';
+    detail.textContent = activity.amountBani > 0 ? formatRon(activity.amountBani) : 'free';
   }
   const time = document.createElement('span');
   time.className = 'pp-act-time';
@@ -126,7 +126,7 @@ function onExited(activity) {
 function setLive(isLive) {
   const badge = $('live-badge');
   badge.classList.toggle('off', !isLive);
-  badge.lastChild.textContent = isLive ? 'LIVE' : 'Reconectare…';
+  badge.lastChild.textContent = isLive ? 'LIVE' : 'Reconnecting…';
 }
 
 const RETRY_MIN_MS = 5000;
@@ -169,7 +169,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function tickClock() {
-  $('clock').textContent = `Ora parcării ${timeFormat.format(parkingNow())} · ×${clock.speed}`;
+  $('clock').textContent = `Parking time ${timeFormat.format(parkingNow())} · ×${clock.speed}`;
 }
 setInterval(tickClock, 1000);
 
@@ -203,7 +203,7 @@ canvas.addEventListener('click', e => {
     choose(spot, car.ticketCode, spotOnScreen(spot));
   } else {
     lot.select(null);
-    showToast(`Locul ${spot} e liber`);
+    showToast(`Spot ${spot} is free`);
   }
 });
 
@@ -224,7 +224,7 @@ document.addEventListener('ticket:closed', () => lot.select(null));
 const motionToggle = $('motion-toggle');
 function showMotionChoice() {
   motionToggle.setAttribute('aria-pressed', String(!reducedMotion));
-  motionToggle.textContent = reducedMotion ? 'Animații oprite' : 'Animații pornite';
+  motionToggle.textContent = reducedMotion ? 'Animations off' : 'Animations on';
 }
 motionToggle.addEventListener('click', () => setAnimations(reducedMotion));
 document.addEventListener('motion:change', e => {
