@@ -89,7 +89,7 @@ class ParkPulseIT {
     void adminCanManageCarsAndUsers() {
         Browser admin = Browser.loggedInAs("admin");
         String cars = admin.get("/Cars").body();
-        assertTrue(cars.contains("Add Car"));
+        assertTrue(cars.contains("Adaugă abonament"));
         assertTrue(cars.contains("SB-01-PKP"));
         assertTrue(admin.get("/Users").body().contains("Add User"));
     }
@@ -99,7 +99,7 @@ class ParkPulseIT {
         Browser viewer = Browser.loggedInAs("viewer");
         String cars = viewer.get("/Cars").body();
         assertTrue(cars.contains("SB-01-PKP"));
-        assertFalse(cars.contains("Add Car"));
+        assertFalse(cars.contains("Adaugă abonament"));
         assertEquals(403, viewer.get("/AddCar").statusCode());
         assertEquals(403, viewer.get("/EditUser?id=1").statusCode());
         // The old invoice form is gone, so nobody can POST to the user list any more
@@ -364,6 +364,18 @@ class ParkPulseIT {
         assertEquals(200, photo.statusCode());
         assertEquals("image/png", photo.headers().firstValue("Content-Type").orElse(""));
         assertEquals("nosniff", photo.headers().firstValue("X-Content-Type-Options").orElse(""));
+        assertTrue(admin.get("/Cars").body().contains("CarPhotos?id=" + carId));
+    }
+
+    @Test
+    void theSubscriptionsPageShowsAnIconForCarsWithoutAPhoto() {
+        Browser admin = Browser.loggedInAs("admin");
+        String plate = "NP-" + shortId();
+        assertEquals(302, addCar(admin, plate, "N-" + shortId()).statusCode());
+        String page = admin.get("/Cars").body();
+        assertTrue(page.contains("Abonamente"), page);
+        // No request for a photo that does not exist (it showed as a broken image)
+        assertTrue(page.contains("pp-no-photo"), page);
     }
 
     @Test

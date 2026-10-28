@@ -10,7 +10,7 @@ A public parking lot you can watch live. Simulated cars drive in and out every f
 - **The ticket**: click a car or a line of the activity list and the ticket grows out of it. Its QR code "prints" row by row, and the amount due keeps climbing while the car is parked. The QR code opens the ticket on its own page (`/bilet/{code}`), made for phones. After the car leaves, the ticket offers a PDF receipt, 80 mm wide like a till receipt.
 - **Billing** (`/billing`, role `INVOICING`): money per period with a bar for each day, the paid tickets with search and pages, and a PDF report for any period of up to 366 days.
 - **API docs** (`/api-docs`, public): Swagger UI on the OpenAPI document that Payara builds from the annotations (`/openapi`).
-- **Cars and users** (staff): add, edit and delete cars with an owner and a photo, and manage the users and their roles.
+- **Subscriptions and users** (staff, `/Cars` and `/Users`): cars with a reserved spot, an owner and a photo, kept apart from the simulated cars on the map, and the users with their roles.
 
 The parking lot has its own clock that runs 60 times faster than real time, so a few minutes on the page show the stays and prices of a few hours. The tariff is 15 free minutes, then 6 lei per hour, charged for every started minute.
 

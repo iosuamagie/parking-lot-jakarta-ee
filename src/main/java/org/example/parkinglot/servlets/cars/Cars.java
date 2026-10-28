@@ -30,6 +30,7 @@ public class Cars extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<CarDto> cars = carsBean.findAllCars();
         request.setAttribute("cars", cars);
+        request.setAttribute("carIdsWithPhoto", carsBean.findCarIdsWithPhoto());
         request.setAttribute("numberOfFreeParkingSpots", CarsBean.TOTAL_PARKING_SPOTS - cars.size());
         request.getRequestDispatcher("/WEB-INF/pages/cars/cars.jsp").forward(request, response);
     }

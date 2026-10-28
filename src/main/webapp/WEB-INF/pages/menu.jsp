@@ -17,7 +17,7 @@
         <ul class="pp-nav">
             <li><a class="pp-pill ${path eq ctx.concat('/') or path.endsWith('/index.jsp') ? 'active' : ''}" href="${ctx}/">Live</a></li>
             <c:if test="${pageContext.request.isUserInRole('READ_CARS')}">
-                <li><a class="pp-pill ${path.endsWith('/Cars') ? 'active' : ''}" href="${ctx}/Cars">Mașini</a></li>
+                <li><a class="pp-pill ${path.endsWith('/Cars') ? 'active' : ''}" href="${ctx}/Cars">Abonamente</a></li>
             </c:if>
             <c:if test="${pageContext.request.isUserInRole('READ_USERS')}">
                 <li><a class="pp-pill ${path.endsWith('/Users') ? 'active' : ''}" href="${ctx}/Users">Useri</a></li>

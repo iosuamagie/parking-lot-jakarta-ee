@@ -352,6 +352,8 @@ main { flex: 1; }
 .pp-form { max-width: 720px; margin: 0 auto; }
 .pp-form .pp-page-title { margin-bottom: 16px; }
 .pp-thumb { border-radius: 6px; object-fit: cover; background: var(--pp-line); }
+.pp-no-photo { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 36px; color: var(--pp-soft); }
+.pp-page-note { margin: -8px 0 16px; font-size: 13px; }
 .pp-login { display: flex; justify-content: center; padding: 24px 12px; }
 .pp-login-card { width: 100%; max-width: 380px; }
 .pp-login-logo { display: block; margin-bottom: 16px; }

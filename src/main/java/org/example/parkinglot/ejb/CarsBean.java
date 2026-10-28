@@ -12,7 +12,9 @@ import org.example.parkinglot.entities.CarPhoto;
 import org.example.parkinglot.entities.User;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 @Stateless
@@ -92,6 +94,13 @@ public class CarsBean {
             dtoList.add(dto);
         }
         return dtoList;
+    }
+
+    /** The cars that have a photo, so the list does not ask for photos that do not exist. */
+    public Set<Long> findCarIdsWithPhoto() {
+        return new HashSet<>(entityManager
+                .createQuery("SELECT p.car.id FROM CarPhoto p", Long.class)
+                .getResultList());
     }
 
     public CarDto findById(Long id) {
