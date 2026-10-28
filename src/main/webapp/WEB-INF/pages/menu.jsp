@@ -16,7 +16,6 @@
     <nav aria-label="Meniu">
         <ul class="pp-nav">
             <li><a class="pp-pill ${path eq ctx.concat('/') or path.endsWith('/index.jsp') ? 'active' : ''}" href="${ctx}/">Live</a></li>
-            <li><a class="pp-pill ${path.endsWith('/api-docs') ? 'active' : ''}" href="${ctx}/api-docs">API</a></li>
             <c:if test="${pageContext.request.isUserInRole('READ_CARS')}">
                 <li><a class="pp-pill ${path.endsWith('/Cars') ? 'active' : ''}" href="${ctx}/Cars">Mașini</a></li>
             </c:if>
